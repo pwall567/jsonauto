@@ -21,8 +21,8 @@
   </licenses>
 
   <scm>
-    <connection>https://github.com/pwall567/jsonutil.git</connection>
-    <url>https://github.com/pwall567/jsonutil.git</url>
+    <connection>https://github.com/pwall567/jsonauto.git</connection>
+    <url>https://github.com/pwall567/jsonauto.git</url>
   </scm>
 
   <developers>
