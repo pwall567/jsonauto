@@ -154,7 +154,7 @@ public class JSONSerializer {
     }
 
     /**
-     * Serialize an array of primitive type (except for {@code char} which serializes as a
+     * Serialize an array of primitive type (except for {@code char[]} which serializes as a
      * string).
      *
      * @param   array   the array

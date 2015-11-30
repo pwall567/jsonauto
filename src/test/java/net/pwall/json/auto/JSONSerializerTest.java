@@ -253,12 +253,24 @@ public class JSONSerializerTest {
     }
 
     @Test
-    public void testArrayInt() { // TODO - needs more, and different types
+    public void testArrayInt() {
         int[] array1 = { 1, 2, 3 };
         JSONArray jsonArray = JSONArray.create().addValue(1).addValue(2).addValue(3);
         assertEquals(jsonArray, JSONSerializer.serialize(array1));
 
         array1 = new int[0];
+        jsonArray = JSONArray.create();
+        assertEquals(jsonArray, JSONSerializer.serialize(array1));
+    }
+
+    @Test
+    public void testArrayIntObject() {
+        Integer[] array1 = { 1, 2, 3, null, -5 };
+        JSONArray jsonArray = JSONArray.create().addValue(1).addValue(2).addValue(3).addNull().
+                addValue(-5);
+        assertEquals(jsonArray, JSONSerializer.serialize(array1));
+
+        array1 = new Integer[0];
         jsonArray = JSONArray.create();
         assertEquals(jsonArray, JSONSerializer.serialize(array1));
     }
@@ -358,11 +370,12 @@ public class JSONSerializerTest {
     public void testObject() {
         DummyObject object1 = new DummyObject();
         object1.setString1("value1");
-        JSONObject jsonObject = JSONObject.create().putValue("string1", "value1");
+        JSONObject jsonObject = JSONObject.create().putValue("string1", "value1").
+                putValue("int1", 0);
         assertEquals(jsonObject, JSONSerializer.serialize(object1));
 
         object1 = new DummyObject();
-        jsonObject = JSONObject.create();
+        jsonObject = JSONObject.create().putValue("int1", 0);
         assertEquals(jsonObject, JSONSerializer.serialize(object1));
 
         // TODO - try different kinds of fields: int, Integer, nested objects etc.
@@ -372,7 +385,9 @@ public class JSONSerializerTest {
     public void testSerializeObject() {
         DummyObject object1 = new DummyObject();
         object1.setString1("value1");
-        JSONObject jsonObject = JSONObject.create().putValue("string1", "value1");
+        object1.setInt1(27);
+        JSONObject jsonObject = JSONObject.create().putValue("string1", "value1").
+                putValue("int1", 27);
         assertEquals(jsonObject, JSONSerializer.serializeObject(object1));
     }
 
