@@ -265,9 +265,9 @@ public class JSONSerializerTest {
 
     @Test
     public void testArrayLong() {
-        long[] array1 = { 1L, 2L, 112233445566778899L };
+        long[] array1 = { 1L, 2L, 112233445566778899L, 0L };
         JSONArray jsonArray = JSONArray.create().addValue(1L).addValue(2L).
-                addValue(112233445566778899L);
+                addValue(112233445566778899L).addValue(0L);
         assertEquals(jsonArray, JSONSerializer.serialize(array1));
 
         array1 = new long[0];
@@ -295,6 +295,52 @@ public class JSONSerializerTest {
         array1 = new short[0];
         jsonArray = JSONArray.create();
         assertEquals(jsonArray, JSONSerializer.serialize(array1));
+    }
+
+    @Test
+    public void testArrayDouble() {
+        double[] array1 = { 123E32, -456.789, 0.00005 };
+        JSONArray jsonArray = JSONArray.create().addValue(123E32).addValue(-456.789).
+                addValue(0.00005);
+        assertEquals(jsonArray, JSONSerializer.serialize(array1));
+
+        array1 = new double[0];
+        jsonArray = JSONArray.create();
+        assertEquals(jsonArray, JSONSerializer.serialize(array1));
+    }
+
+    @Test
+    public void testArrayFloat() {
+        float[] array1 = { 123E32F, -456.789F, 0.00005F };
+        JSONArray jsonArray = JSONArray.create().addValue(123E32F).addValue(-456.789F).
+                addValue(0.00005F);
+        assertEquals(jsonArray, JSONSerializer.serialize(array1));
+
+        array1 = new float[0];
+        jsonArray = JSONArray.create();
+        assertEquals(jsonArray, JSONSerializer.serialize(array1));
+    }
+
+    @Test
+    public void testArrayByte() {
+        byte[] array1 = { 123, -27, 0, 0x1F, 0x2F };
+        JSONArray jsonArray = JSONArray.create().addValue(123).addValue(-27).addValue(0).
+                addValue(0x1F).addValue(0x2F);
+        assertEquals(jsonArray, JSONSerializer.serialize(array1));
+
+        array1 = new byte[0];
+        jsonArray = JSONArray.create();
+        assertEquals(jsonArray, JSONSerializer.serialize(array1));
+    }
+
+    @Test
+    public void testArrayChar() {
+        String string1 = "test string!";
+        JSONString jsonString = new JSONString(string1);
+        assertEquals(jsonString, JSONSerializer.serialize(string1.toCharArray()));
+
+        jsonString = new JSONString("");
+        assertEquals(jsonString, JSONSerializer.serialize(new char[0]));
     }
 
     @Test

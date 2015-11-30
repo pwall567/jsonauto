@@ -31,6 +31,7 @@ import java.lang.reflect.Modifier;
 import net.pwall.json.JSONArray;
 import net.pwall.json.JSONBoolean;
 import net.pwall.json.JSONDouble;
+import net.pwall.json.JSONException;
 import net.pwall.json.JSONFloat;
 import net.pwall.json.JSONInteger;
 import net.pwall.json.JSONLong;
@@ -89,6 +90,11 @@ public class JSONSerializer {
             return new JSONString(sb);
         }
 
+        // is it an array of char?
+
+        if (object instanceof char[])
+            return new JSONString(new String((char[])object));
+
         // is it an Object array?
 
         if (object instanceof Object[]) {
@@ -98,7 +104,7 @@ public class JSONSerializer {
             return jsonArray;
         }
 
-        // is it an array of primitive type?
+        // is it an array of primitive type? (other than char)
 
         Class<?> objectClass = object.getClass();
         if (objectClass.isArray())
@@ -107,7 +113,7 @@ public class JSONSerializer {
         // is it an enum?
 
         if (object instanceof Enum)
-            return new JSONString(object.toString());
+            return new JSONString(((Enum<?>)object).name());
 
         // TODO - add List, Set, Map(?), Date, Calendar, BitSet, UUID, java.time classes, ...
 
@@ -148,11 +154,12 @@ public class JSONSerializer {
     }
 
     /**
-     * Serialize an array of primitive type.
+     * Serialize an array of primitive type (except for {@code char} which serializes as a
+     * string).
      *
      * @param   array   the array
      * @return  the JSON for that array
-     * @throws  IllegalArgumentException if the array can't be serialized
+     * @throws  JSONException if the array can't be serialized
      */
     public static JSONArray serializeArray(Object array) {
 
@@ -176,16 +183,32 @@ public class JSONSerializer {
             return jsonArray;
         }
 
+        if (array instanceof double[]) {
+            for (double item : (double[])array)
+                jsonArray.addValue(item);
+            return jsonArray;
+        }
+
+        if (array instanceof float[]) {
+            for (float item : (float[])array)
+                jsonArray.addValue(item);
+            return jsonArray;
+        }
+
         if (array instanceof short[]) {
             for (short item : (short[])array)
                 jsonArray.addValue(item);
             return jsonArray;
         }
 
-        // TODO - add other primitive types
+        if (array instanceof byte[]) {
+            for (byte item : (byte[])array)
+                jsonArray.addValue(item);
+            return jsonArray;
+        }
 
         Class<?> arrayClass = array.getClass();
-        throw new IllegalArgumentException(!arrayClass.isArray() ? "Not an array" :
+        throw new JSONException(!arrayClass.isArray() ? "Not an array" :
                 "Can't serialize array of " + arrayClass.getComponentType());
     }
 
@@ -212,7 +235,7 @@ public class JSONSerializer {
      * @param   jsonObject      the destination {@link JSONObject}
      * @param   objectClass     the {@link Class} object for the source
      * @param   object          the source object
-     * @throws  IllegalArgumentException on any errors accessing the fields
+     * @throws  JSONException on any errors accessing the fields
      */
     private static void addFieldsToJSONObject(JSONObject jsonObject, Class<?> objectClass,
             Object object) {
@@ -238,9 +261,12 @@ public class JSONSerializer {
                     if (value != null)
                         jsonObject.put(fieldName, serialize(value));
                 }
+                catch (JSONException e) {
+                    throw e;
+                }
                 catch (Exception e) {
-                    throw new IllegalArgumentException("Error serializing " + objectClass +
-                            '.' + fieldName);
+                    throw new JSONException("Error serializing " + objectClass + '.' +
+                            fieldName);
                 }
             }
 
