@@ -243,13 +243,35 @@ public class JSONSerializerTest {
     }
 
     @Test
-    public void testArrayLong() { // TODO - needs more, and different types
+    public void testArrayLong() {
         long[] array1 = { 1L, 2L, 112233445566778899L };
         JSONArray jsonArray = JSONArray.create().addValue(1L).addValue(2L).
                 addValue(112233445566778899L);
         assertEquals(jsonArray, JSONSerializer.serialize(array1));
 
         array1 = new long[0];
+        jsonArray = JSONArray.create();
+        assertEquals(jsonArray, JSONSerializer.serialize(array1));
+    }
+
+    @Test
+    public void testArrayBoolean() {
+        boolean[] array1 = { true, false, true };
+        JSONArray jsonArray = JSONArray.create().addValue(true).addValue(false).addValue(true);
+        assertEquals(jsonArray, JSONSerializer.serialize(array1));
+
+        array1 = new boolean[0];
+        jsonArray = JSONArray.create();
+        assertEquals(jsonArray, JSONSerializer.serialize(array1));
+    }
+
+    @Test
+    public void testArrayShort() {
+        short[] array1 = { 123, -456, 0 };
+        JSONArray jsonArray = JSONArray.create().addValue(123).addValue(-456).addValue(0);
+        assertEquals(jsonArray, JSONSerializer.serialize(array1));
+
+        array1 = new short[0];
         jsonArray = JSONArray.create();
         assertEquals(jsonArray, JSONSerializer.serialize(array1));
     }

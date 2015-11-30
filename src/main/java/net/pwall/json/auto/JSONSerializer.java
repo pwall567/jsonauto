@@ -1,5 +1,26 @@
 /*
  * @(#) JSONSerializer.java
+ *
+ * jsonauto JSON Auto-serialization Library
+ * Copyright (c) 2015 Peter Wall
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
  */
 
 package net.pwall.json.auto;
@@ -71,7 +92,7 @@ public class JSONSerializer {
         // is it an Object array?
 
         if (object instanceof Object[]) {
-            JSONArray jsonArray = JSONArray.create();
+            JSONArray jsonArray = new JSONArray();
             for (Object item : (Object[])object)
                 jsonArray.add(serialize(item));
             return jsonArray;
@@ -139,20 +160,33 @@ public class JSONSerializer {
 
         if (array instanceof int[]) {
             for (int item : (int[])array)
-                jsonArray.add(JSONInteger.valueOf(item));
+                jsonArray.addValue(item);
             return jsonArray;
         }
 
         if (array instanceof long[]) {
             for (long item : (long[])array)
-                jsonArray.add(JSONLong.valueOf(item));
+                jsonArray.addValue(item);
+            return jsonArray;
+        }
+
+        if (array instanceof boolean[]) {
+            for (boolean item : (boolean[])array)
+                jsonArray.addValue(item);
+            return jsonArray;
+        }
+
+        if (array instanceof short[]) {
+            for (short item : (short[])array)
+                jsonArray.addValue(item);
             return jsonArray;
         }
 
         // TODO - add other primitive types
 
-        throw new IllegalArgumentException("Can't serialize array of " +
-                array.getClass().getComponentType());
+        Class<?> arrayClass = array.getClass();
+        throw new IllegalArgumentException(!arrayClass.isArray() ? "Not an array" :
+                "Can't serialize array of " + arrayClass.getComponentType());
     }
 
     /**
