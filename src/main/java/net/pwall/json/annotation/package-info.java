@@ -1,7 +1,7 @@
 /*
- * @(#) DummyEnum.java
+ * @(#) package-info.java
  *
- * jsonauto JSON Auto-serialization Library
+ * jsonauto JSON Utility Library
  * Copyright (c) 2015 Peter Wall
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -23,15 +23,10 @@
  * SOFTWARE.
  */
 
-package net.pwall.json.auto;
-
 /**
- * Dummy enum for testing auto-serialization.
+ * Annotation classes for JSON auto serialization / deserialization.
  *
- * @author pwall
+ * @author Peter Wall
  */
-public enum DummyEnum {
 
-    ALPHA, BETA, GAMMA
-
-}
+package net.pwall.json.annotation;
