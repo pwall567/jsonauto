@@ -370,14 +370,14 @@ public class JSONSerializerTest {
         assertEquals(jsonString, JSONSerializer.serialize(enum1));
     }
 
-//    @Test
-//    public void testListString() {
-//        List<String> list1 = new ArrayList<>();
-//        list1.add("entry1");
-//        list1.add("entry2");
-//        JSONArray jsonArray = JSONArray.create().addValue("entry1").addValue("entry2");
-//        assertEquals(jsonArray, JSONSerializer.serialize(list1));
-//    }
+    @Test
+    public void testListString() {
+        List<String> list1 = new ArrayList<>();
+        list1.add("entry1");
+        list1.add("entry2");
+        JSONArray jsonArray = JSONArray.create().addValue("entry1").addValue("entry2");
+        assertEquals(jsonArray, JSONSerializer.serialize(list1));
+    }
 
     @Test
     public void testObject() {

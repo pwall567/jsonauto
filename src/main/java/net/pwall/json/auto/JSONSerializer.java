@@ -28,6 +28,7 @@ package net.pwall.json.auto;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.List;
 
 import net.pwall.json.JSONArray;
 import net.pwall.json.JSONBoolean;
@@ -135,6 +136,11 @@ public class JSONSerializer {
         if (object instanceof Enum)
             return new JSONString(((Enum<?>)object).name());
 
+        // is it a List?
+
+        if (object instanceof List)
+            return serializeList((List<?>)object);
+
         // TODO - add List, Set, Map(?), Date, Calendar, BitSet, UUID, java.time classes, ...
 
         // serialize it as an Object
@@ -230,6 +236,19 @@ public class JSONSerializer {
         Class<?> arrayClass = array.getClass();
         throw new JSONException(!arrayClass.isArray() ? "Not an array" :
                 "Can't serialize array of " + arrayClass.getComponentType());
+    }
+
+    /**
+     * Serialize a {@link List}.
+     *
+     * @param   list    the {@link List}
+     * @return  the JSON for that {@link List}
+     */
+    public static JSONArray serializeList(List<?> list) {
+        JSONArray jsonArray = JSONArray.create();
+        for (Object item : list)
+            jsonArray.add(serialize(item));
+        return jsonArray;
     }
 
     /**
