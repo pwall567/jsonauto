@@ -22,6 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+
 package net.pwall.json.auto;
 
 import net.pwall.json.JSONArray;
@@ -38,7 +39,7 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 /**
- * Default comment for {@code JSONSerializerTest}.
+ * Test class for {@link JSONSerializer}.
  *
  * @author Peter Wall
  */
@@ -370,24 +371,56 @@ public class JSONSerializerTest {
     public void testObject() {
         DummyObject object1 = new DummyObject();
         object1.setString1("value1");
-        JSONObject jsonObject = JSONObject.create().putValue("string1", "value1").
-                putValue("int1", 0);
+        JSONObject jsonObject = JSONObject.create().putValue("string1", "value1");
         assertEquals(jsonObject, JSONSerializer.serialize(object1));
 
         object1 = new DummyObject();
-        jsonObject = JSONObject.create().putValue("int1", 0);
+        jsonObject = JSONObject.create();
         assertEquals(jsonObject, JSONSerializer.serialize(object1));
+    }
 
-        // TODO - try different kinds of fields: int, Integer, nested objects etc.
+    @Test
+    public void testObject2() {
+        DummyObject2 object2 = new DummyObject2();
+        object2.setString1("value1");
+        JSONObject jsonObject = JSONObject.create().putValue("string1", "value1").
+                putValue("int1", 0);
+        assertEquals(jsonObject, JSONSerializer.serialize(object2));
+
+        object2 = new DummyObject2();
+        jsonObject = JSONObject.create().putValue("int1", 0);
+        assertEquals(jsonObject, JSONSerializer.serialize(object2));
+    }
+
+    @Test
+    public void testObject3() {
+        DummyObject3 object3 = new DummyObject3();
+        object3.setString1("value1");
+        JSONObject jsonObject = JSONObject.create().putValue("string1", "value1");
+        assertEquals(jsonObject, JSONSerializer.serialize(object3));
+
+        object3.setInteger1(57);
+        jsonObject.putValue("integer1", 57);
+        assertEquals(jsonObject, JSONSerializer.serialize(object3));
+
+        DummyObject object1 = new DummyObject();
+        object1.setString1("value2");
+        object3.setDummy1(object1);
+        jsonObject.put("dummy1", JSONObject.create().putValue("string1", "value2"));
+        assertEquals(jsonObject, JSONSerializer.serialize(object3));
+
+        object3 = new DummyObject3();
+        jsonObject = JSONObject.create();
+        assertEquals(jsonObject, JSONSerializer.serialize(object3));
+
+        // TODO - try different kinds of fields: array etc.; also derived class
     }
 
     @Test
     public void testSerializeObject() {
         DummyObject object1 = new DummyObject();
         object1.setString1("value1");
-        object1.setInt1(27);
-        JSONObject jsonObject = JSONObject.create().putValue("string1", "value1").
-                putValue("int1", 27);
+        JSONObject jsonObject = JSONObject.create().putValue("string1", "value1");
         assertEquals(jsonObject, JSONSerializer.serializeObject(object1));
     }
 

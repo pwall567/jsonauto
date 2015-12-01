@@ -1,5 +1,5 @@
 /*
- * @(#) DummyObject.java
+ * @(#) DummyObject3.java
  *
  * jsonauto JSON Auto-serialization Library
  * Copyright (c) 2015 Peter Wall
@@ -30,9 +30,11 @@ package net.pwall.json.auto;
  *
  * @author Peter Wall
  */
-public class DummyObject {
+public class DummyObject3 {
 
     private String string1;
+    private Integer integer1;
+    private DummyObject dummy1;
 
     public String getString1() {
         return string1;
@@ -40,6 +42,22 @@ public class DummyObject {
 
     public void setString1(String string1) {
         this.string1 = string1;
+    }
+
+    public Integer getInteger1() {
+        return integer1;
+    }
+
+    public void setInteger1(Integer integer1) {
+        this.integer1 = integer1;
+    }
+
+    public DummyObject getDummy1() {
+        return dummy1;
+    }
+
+    public void setDummy1(DummyObject dummy1) {
+        this.dummy1 = dummy1;
     }
 
 }
