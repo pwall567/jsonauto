@@ -25,6 +25,9 @@
 
 package net.pwall.json.auto;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import net.pwall.json.JSONArray;
 import net.pwall.json.JSONBoolean;
 import net.pwall.json.JSONDouble;
@@ -367,6 +370,15 @@ public class JSONSerializerTest {
         assertEquals(jsonString, JSONSerializer.serialize(enum1));
     }
 
+//    @Test
+//    public void testListString() {
+//        List<String> list1 = new ArrayList<>();
+//        list1.add("entry1");
+//        list1.add("entry2");
+//        JSONArray jsonArray = JSONArray.create().addValue("entry1").addValue("entry2");
+//        assertEquals(jsonArray, JSONSerializer.serialize(list1));
+//    }
+
     @Test
     public void testObject() {
         DummyObject object1 = new DummyObject();
@@ -409,11 +421,37 @@ public class JSONSerializerTest {
         jsonObject.put("dummy1", JSONObject.create().putValue("string1", "value2"));
         assertEquals(jsonObject, JSONSerializer.serialize(object3));
 
+        object3.setInteger1(null);
+        jsonObject.remove("integer1");
+        assertEquals(jsonObject, JSONSerializer.serialize(object3));
+
+        int[] array1 = new int[] { 1, 1, 2, 3, 5, 8, 13 };
+        object3.setArray1(array1);
+        jsonObject.put("array1", JSONArray.create().addValue(1).addValue(1).addValue(2).
+                addValue(3).addValue(5).addValue(8).addValue(13));
+        assertEquals(jsonObject, JSONSerializer.serialize(object3));
+
         object3 = new DummyObject3();
         jsonObject = JSONObject.create();
         assertEquals(jsonObject, JSONSerializer.serialize(object3));
+    }
 
-        // TODO - try different kinds of fields: array etc.; also derived class
+    @Test
+    public void testObject4() {
+        DummyObject4 object4 = new DummyObject4();
+        object4.setString1("value1");
+        object4.setInt1(27);
+        JSONObject jsonObject = JSONObject.create().putValue("string1", "value1").
+                putValue("int1", 27);
+        assertEquals(jsonObject, JSONSerializer.serialize(object4));
+    }
+
+    @Test
+    public void testObject5() {
+        DummyObject5 object5 = new DummyObject5();
+        object5.setInt1(27);
+        JSONObject jsonObject = JSONObject.create().putValue("dec", "27").putValue("hex", "1B");
+        assertEquals(jsonObject, JSONSerializer.serialize(object5));
     }
 
     @Test

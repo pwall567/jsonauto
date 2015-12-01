@@ -26,6 +26,7 @@
 package net.pwall.json.auto;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
 import net.pwall.json.JSONArray;
@@ -109,6 +110,25 @@ public class JSONSerializer {
         Class<?> objectClass = object.getClass();
         if (objectClass.isArray())
             return serializeArray(object);
+
+        // does it have a "toJSON()" method?
+        // questions:
+        // - should we require that the method be public?
+        // - should we look for method in include superclass?
+
+        try {
+            Method toJSON = objectClass.getDeclaredMethod("toJSON");
+            toJSON.setAccessible(true);
+            if (JSONValue.class.isAssignableFrom(toJSON.getReturnType()))
+                return (JSONValue)toJSON.invoke(object);
+        }
+        catch (NoSuchMethodException e) {
+            // ignore - normal case
+        }
+        catch (Exception e) {
+            throw new JSONException("Custom serialization failed for " + objectClass.getName(),
+                    e);
+        }
 
         // is it an enum?
 

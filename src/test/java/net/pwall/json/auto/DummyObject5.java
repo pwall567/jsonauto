@@ -1,5 +1,5 @@
 /*
- * @(#) DummyObject3.java
+ * @(#) DummyObject5.java
  *
  * jsonauto JSON Auto-serialization Library
  * Copyright (c) 2015 Peter Wall
@@ -25,48 +25,29 @@
 
 package net.pwall.json.auto;
 
+import net.pwall.json.JSONObject;
+
 /**
  * Dummy object for testing JSON auto-serialization and deserialization.
  *
  * @author Peter Wall
  */
-public class DummyObject3 {
+public class DummyObject5 {
 
-    private String string1;
-    private Integer integer1;
-    private DummyObject dummy1;
-    private int[] array1;
+    private int int1;
 
-    public String getString1() {
-        return string1;
+    public int getInt1() {
+        return int1;
     }
 
-    public void setString1(String string1) {
-        this.string1 = string1;
+    public void setInt1(int int1) {
+        this.int1 = int1;
     }
 
-    public Integer getInteger1() {
-        return integer1;
-    }
-
-    public void setInteger1(Integer integer1) {
-        this.integer1 = integer1;
-    }
-
-    public DummyObject getDummy1() {
-        return dummy1;
-    }
-
-    public void setDummy1(DummyObject dummy1) {
-        this.dummy1 = dummy1;
-    }
-
-    public int[] getArray1() {
-        return array1;
-    }
-
-    public void setArray1(int[] array1) {
-        this.array1 = array1;
+    @SuppressWarnings("unused")
+    private JSONObject toJSON() {
+        return JSONObject.create().putValue("dec", Integer.toString(int1)).
+                putValue("hex", Integer.toHexString(int1).toUpperCase());
     }
 
 }
