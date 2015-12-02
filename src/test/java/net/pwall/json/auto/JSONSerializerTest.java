@@ -27,9 +27,14 @@ package net.pwall.json.auto;
 
 import java.util.ArrayList;
 import java.util.BitSet;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.TimeZone;
 
 import net.pwall.json.JSONArray;
 import net.pwall.json.JSONBoolean;
@@ -39,7 +44,6 @@ import net.pwall.json.JSONInteger;
 import net.pwall.json.JSONLong;
 import net.pwall.json.JSONObject;
 import net.pwall.json.JSONString;
-import net.pwall.json.JSONValue;
 
 import org.junit.Test;
 
@@ -401,7 +405,7 @@ public class JSONSerializerTest {
         set1.add("entry4");
         JSONArray jsonArray = JSONArray.create().addValue("entry1").addValue("entry2").
                 addValue("entry3").addValue("entry4");
-        assertTrue(arraySameContents(jsonArray, (JSONArray)JSONSerializer.serialize(set1)));
+        assertTrue(listSameContents(jsonArray, (JSONArray)JSONSerializer.serialize(set1)));
     }
 
     @Test
@@ -411,7 +415,80 @@ public class JSONSerializerTest {
         set1.add(63);
         set1.add(32767);
         JSONArray jsonArray = JSONArray.create().addValue(15).addValue(63).addValue(32767);
-        assertTrue(arraySameContents(jsonArray, (JSONArray)JSONSerializer.serialize(set1)));
+        assertTrue(listSameContents(jsonArray, (JSONArray)JSONSerializer.serialize(set1)));
+    }
+
+    @Test
+    public void testMapStringString() {
+        Map<String, String> map1 = new HashMap<>();
+        map1.put("key1", "value1");
+        map1.put("key2", "value2");
+        map1.put("key3", "value3");
+        JSONObject jsonObject = JSONObject.create().putValue("key1", "value1").
+                putValue("key2", "value2").putValue("key3", "value3");
+        assertEquals(jsonObject, JSONSerializer.serialize(map1));
+    }
+
+    @Test
+    public void testMapStringInteger() {
+        Map<String, Integer> map1 = new HashMap<>();
+        map1.put("key1", 370);
+        map1.put("key2", 371);
+        JSONObject jsonObject = JSONObject.create().putValue("key1", 370).putValue("key2", 371);
+        assertEquals(jsonObject, JSONSerializer.serialize(map1));
+    }
+
+    @Test
+    public void testCalendar() {
+        Calendar cal1 = Calendar.getInstance();
+        cal1.set(Calendar.YEAR, 2015);
+        cal1.set(Calendar.MONTH, 11);
+        cal1.set(Calendar.DAY_OF_MONTH, 2);
+        cal1.set(Calendar.HOUR_OF_DAY, 21);
+        cal1.set(Calendar.MINUTE, 59);
+        cal1.set(Calendar.SECOND, 34);
+        cal1.set(Calendar.MILLISECOND, 123);
+        cal1.set(Calendar.ZONE_OFFSET, 11 * 60 * 60 * 1000);
+        JSONString jsonString = new JSONString("2015-12-02T21:59:34.123+11:00");
+        assertEquals(jsonString, JSONSerializer.serialize(cal1));
+    }
+
+    @Test
+    public void testDate() {
+        Calendar cal1 = Calendar.getInstance();
+        cal1.set(Calendar.YEAR, 2015);
+        cal1.set(Calendar.MONTH, 11);
+        cal1.set(Calendar.DAY_OF_MONTH, 2);
+        cal1.set(Calendar.HOUR_OF_DAY, 21);
+        cal1.set(Calendar.MINUTE, 59);
+        cal1.set(Calendar.SECOND, 34);
+        cal1.set(Calendar.MILLISECOND, 123);
+        Date date1 = cal1.getTime();
+        int offset = TimeZone.getDefault().getOffset(date1.getTime());
+        cal1.set(Calendar.ZONE_OFFSET, offset);
+        StringBuilder sb = new StringBuilder("2015-12-02T21:59:34.123");
+        offset /= 60 * 1000;
+        if (offset == 0)
+            sb.append('Z');
+        else {
+            if (offset < 0) {
+                sb.append('-');
+                offset = - offset;
+            }
+            else
+                sb.append('+');
+            append2Digits(sb, offset / 60);
+            sb.append(':');
+            append2Digits(sb, offset % 60);
+        }
+        JSONString jsonString = new JSONString(sb);
+        assertEquals(jsonString, JSONSerializer.serialize(date1));
+    }
+
+    private static void append2Digits(StringBuilder sb, int n) {
+        if (n < 10)
+            sb.append('0');
+        sb.append(n);
     }
 
     @Test
@@ -520,7 +597,29 @@ public class JSONSerializerTest {
         jsonArray.add(JSONObject.create().putValue("dec", "27").putValue("hex", "1B"));
         jsonArray.add(JSONObject.create().putValue("dec", "45").putValue("hex", "2D"));
         jsonArray.add(JSONObject.create().putValue("dec", "127").putValue("hex", "7F"));
-        assertTrue(arraySameContents(jsonArray, (JSONArray)JSONSerializer.serialize(set1)));
+        assertTrue(listSameContents(jsonArray, (JSONArray)JSONSerializer.serialize(set1)));
+    }
+
+    @Test
+    public void testMapStringObject5() {
+        Map<String, DummyObject5> map1 = new HashMap<>();
+        DummyObject5 object5 = new DummyObject5();
+        object5.setInt1(27);
+        map1.put("first", object5);
+        DummyObject5 object5b = new DummyObject5();
+        object5b.setInt1(45);
+        map1.put("second", object5b);
+        DummyObject5 object5c = new DummyObject5();
+        object5c.setInt1(127);
+        map1.put("third", object5c);
+        JSONObject jsonObject = JSONObject.create();
+        jsonObject.put("first",
+                JSONObject.create().putValue("dec", "27").putValue("hex", "1B"));
+        jsonObject.put("second",
+                JSONObject.create().putValue("dec", "45").putValue("hex", "2D"));
+        jsonObject.put("third",
+                JSONObject.create().putValue("dec", "127").putValue("hex", "7F"));
+        assertEquals(jsonObject, JSONSerializer.serialize(map1));
     }
 
     @Test
@@ -532,23 +631,21 @@ public class JSONSerializerTest {
     }
 
     /**
-     * Test that two {@link JSONArray}s have the same contents, regardless of order (used for
-     * checking serialization of {@link Set}.
+     * Test that two {@link List}s have the same contents, regardless of order (used for
+     * checking serialization of {@link Set}).
      *
-     * @param   array1  the first {@link JSONArray}
-     * @param   array2  the second {@link JSONArray}
-     * @return  {@code true} if the arrays have the same contents, {@code false} otherwise
+     * @param   list1   the first {@link List}
+     * @param   list2   the second {@link List}
+     * @return  {@code true} if the lists have the same contents, {@code false} otherwise
      */
-    private static boolean arraySameContents(JSONArray array1, JSONArray array2) {
-        int len = array1.size();
-        if (len != array2.size())
+    private static boolean listSameContents(List<?> list1, List<?> list2) {
+        int len = list1.size();
+        if (len != list2.size())
             return false;
         BitSet bitSet = new BitSet();
-        for (JSONValue value : array1) {
-            int i = array2.indexOf(value);
-            if (i < 0)
-                return false;
-            if (bitSet.get(i))
+        for (Object item : list1) {
+            int i = list2.indexOf(item);
+            if (i < 0 || bitSet.get(i))
                 return false;
             bitSet.set(i);
         }

@@ -28,8 +28,12 @@ package net.pwall.json.auto;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.TimeZone;
 
 import net.pwall.json.JSONArray;
 import net.pwall.json.JSONBoolean;
@@ -142,14 +146,29 @@ public class JSONSerializer {
         if (object instanceof List)
             return serializeList((List<?>)object);
 
-        // is it a List?
+        // is it a Set?
 
         if (object instanceof Set)
             return serializeSet((Set<?>)object);
 
-        // TODO - add List, Set, Map(?), Date, Calendar, BitSet, UUID, java.time classes, ...
+        // is it a Map?
 
-        // serialize it as an Object
+        if (object instanceof Map)
+            return serializeMap((Map<?, ?>)object);
+
+        // is it a Calendar?
+
+        if (object instanceof Calendar)
+            return serializeCalendar((Calendar)object);
+
+        // is it a Date?
+
+        if (object instanceof Date)
+            return serializeDate((Date)object);
+
+        // TODO - add BitSet, UUID, java.time classes, ...
+
+        // serialize it as an Object (this may not be a satisfactory default behaviour)
 
         JSONObject jsonObject = new JSONObject();
         addFieldsToJSONObject(jsonObject, objectClass, object);
@@ -251,7 +270,7 @@ public class JSONSerializer {
      * @return  the JSON for that {@link List}
      */
     public static JSONArray serializeList(List<?> list) {
-        JSONArray jsonArray = JSONArray.create();
+        JSONArray jsonArray = new JSONArray();
         for (Object item : list)
             jsonArray.add(serialize(item));
         return jsonArray;
@@ -260,14 +279,91 @@ public class JSONSerializer {
     /**
      * Serialize a {@link Set}.
      *
-     * @param   list    the {@link List}
-     * @return  the JSON for that {@link List}
+     * @param   set     the {@link Set}
+     * @return  the JSON for that {@link Set}
      */
     public static JSONArray serializeSet(Set<?> set) {
-        JSONArray jsonArray = JSONArray.create();
+        JSONArray jsonArray = new JSONArray();
         for (Object item : set)
             jsonArray.add(serialize(item));
         return jsonArray;
+    }
+
+    /**
+     * Serialize a {@link Map} to a {@link JSONObject}.  The key is converted to a string (by
+     * means of the {@link Object#toString() toString()} method), and the value is serialized
+     * using this class.
+     *
+     * @param   map     the {@link Map}
+     * @return  the JSON for that {@link Map}
+     */
+    public static JSONObject serializeMap(Map<?, ?> map) {
+        JSONObject jsonObject = new JSONObject();
+        for (Map.Entry<?, ?> entry : map.entrySet())
+            jsonObject.put(entry.getKey().toString(), serialize(entry.getValue()));
+        return jsonObject;
+    }
+
+    /**
+     * Serialize a {@link Date}.
+     *
+     * @param   date    the {@link Date}
+     * @return  the JSON for that {@link Date}
+     */
+    public static JSONString serializeDate(Date date) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        calendar.set(Calendar.ZONE_OFFSET, TimeZone.getDefault().getOffset(date.getTime()));
+        return serializeCalendar(calendar);
+    }
+
+    /**
+     * Serialize a {@link Calendar}.
+     *
+     * @param   calendar    the {@link Calendar}
+     * @return  the JSON for that {@link Calendar}
+     */
+    public static JSONString serializeCalendar(Calendar calendar) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(calendar.get(Calendar.YEAR));
+        sb.append('-');
+        append2Digits(sb, calendar.get(Calendar.MONTH) + 1);
+        sb.append('-');
+        append2Digits(sb, calendar.get(Calendar.DAY_OF_MONTH));
+        sb.append('T');
+        append2Digits(sb, calendar.get(Calendar.HOUR_OF_DAY));
+        sb.append(':');
+        append2Digits(sb, calendar.get(Calendar.MINUTE));
+        sb.append(':');
+        append2Digits(sb, calendar.get(Calendar.SECOND));
+        sb.append('.');
+        append3Digits(sb, calendar.get(Calendar.MILLISECOND));
+        int offset = calendar.get(Calendar.ZONE_OFFSET) / (60 * 1000);
+        if (offset == 0)
+            sb.append('Z');
+        else {
+            if (offset < 0) {
+                sb.append('-');
+                offset = -offset;
+            }
+            else
+                sb.append('+');
+            append2Digits(sb, offset / 60);
+            sb.append(':');
+            append2Digits(sb, offset % 60);
+        }
+        return new JSONString(sb);
+    }
+
+    private static void append2Digits(StringBuilder sb, int n) {
+        sb.append((char)((n / 10) + '0'));
+        sb.append((char)((n % 10) + '0'));
+    }
+
+    private static void append3Digits(StringBuilder sb, int n) {
+        sb.append((char)((n / 100) + '0'));
+        sb.append((char)(((n / 10) % 10) + '0'));
+        sb.append((char)((n % 10) + '0'));
     }
 
     /**
