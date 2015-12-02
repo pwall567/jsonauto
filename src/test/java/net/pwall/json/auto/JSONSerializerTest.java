@@ -26,7 +26,10 @@
 package net.pwall.json.auto;
 
 import java.util.ArrayList;
+import java.util.BitSet;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import net.pwall.json.JSONArray;
 import net.pwall.json.JSONBoolean;
@@ -36,6 +39,7 @@ import net.pwall.json.JSONInteger;
 import net.pwall.json.JSONLong;
 import net.pwall.json.JSONObject;
 import net.pwall.json.JSONString;
+import net.pwall.json.JSONValue;
 
 import org.junit.Test;
 
@@ -380,6 +384,37 @@ public class JSONSerializerTest {
     }
 
     @Test
+    public void testListInteger() {
+        List<Integer> list1 = new ArrayList<>();
+        list1.add(25);
+        list1.add(-345);
+        JSONArray jsonArray = JSONArray.create().addValue(25).addValue(-345);
+        assertEquals(jsonArray, JSONSerializer.serialize(list1));
+    }
+
+    @Test
+    public void testSetString() {
+        Set<String> set1 = new HashSet<>();
+        set1.add("entry1");
+        set1.add("entry2");
+        set1.add("entry3");
+        set1.add("entry4");
+        JSONArray jsonArray = JSONArray.create().addValue("entry1").addValue("entry2").
+                addValue("entry3").addValue("entry4");
+        assertTrue(arraySameContents(jsonArray, (JSONArray)JSONSerializer.serialize(set1)));
+    }
+
+    @Test
+    public void testSetInteger() {
+        Set<Integer> set1 = new HashSet<>();
+        set1.add(15);
+        set1.add(63);
+        set1.add(32767);
+        JSONArray jsonArray = JSONArray.create().addValue(15).addValue(63).addValue(32767);
+        assertTrue(arraySameContents(jsonArray, (JSONArray)JSONSerializer.serialize(set1)));
+    }
+
+    @Test
     public void testObject() {
         DummyObject object1 = new DummyObject();
         object1.setString1("value1");
@@ -455,11 +490,71 @@ public class JSONSerializerTest {
     }
 
     @Test
+    public void testListObject5() {
+        List<DummyObject5> list1 = new ArrayList<>();
+        DummyObject5 object5 = new DummyObject5();
+        object5.setInt1(27);
+        list1.add(object5);
+        DummyObject5 object5b = new DummyObject5();
+        object5b.setInt1(45);
+        list1.add(object5b);
+        JSONArray jsonArray = JSONArray.create();
+        jsonArray.add(JSONObject.create().putValue("dec", "27").putValue("hex", "1B"));
+        jsonArray.add(JSONObject.create().putValue("dec", "45").putValue("hex", "2D"));
+        assertEquals(jsonArray, JSONSerializer.serialize(list1));
+    }
+
+    @Test
+    public void testSetObject5() {
+        Set<DummyObject5> set1 = new HashSet<>();
+        DummyObject5 object5 = new DummyObject5();
+        object5.setInt1(27);
+        set1.add(object5);
+        DummyObject5 object5b = new DummyObject5();
+        object5b.setInt1(45);
+        set1.add(object5b);
+        DummyObject5 object5c = new DummyObject5();
+        object5c.setInt1(127);
+        set1.add(object5c);
+        JSONArray jsonArray = JSONArray.create();
+        jsonArray.add(JSONObject.create().putValue("dec", "27").putValue("hex", "1B"));
+        jsonArray.add(JSONObject.create().putValue("dec", "45").putValue("hex", "2D"));
+        jsonArray.add(JSONObject.create().putValue("dec", "127").putValue("hex", "7F"));
+        assertTrue(arraySameContents(jsonArray, (JSONArray)JSONSerializer.serialize(set1)));
+    }
+
+    @Test
     public void testSerializeObject() {
         DummyObject object1 = new DummyObject();
         object1.setString1("value1");
         JSONObject jsonObject = JSONObject.create().putValue("string1", "value1");
         assertEquals(jsonObject, JSONSerializer.serializeObject(object1));
+    }
+
+    /**
+     * Test that two {@link JSONArray}s have the same contents, regardless of order (used for
+     * checking serialization of {@link Set}.
+     *
+     * @param   array1  the first {@link JSONArray}
+     * @param   array2  the second {@link JSONArray}
+     * @return  {@code true} if the arrays have the same contents, {@code false} otherwise
+     */
+    private static boolean arraySameContents(JSONArray array1, JSONArray array2) {
+        int len = array1.size();
+        if (len != array2.size())
+            return false;
+        BitSet bitSet = new BitSet();
+        for (JSONValue value : array1) {
+            int i = array2.indexOf(value);
+            if (i < 0)
+                return false;
+            if (bitSet.get(i))
+                return false;
+            bitSet.set(i);
+        }
+        if (bitSet.nextClearBit(0) != len)
+            return false;
+        return true;
     }
 
 }

@@ -29,6 +29,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.List;
+import java.util.Set;
 
 import net.pwall.json.JSONArray;
 import net.pwall.json.JSONBoolean;
@@ -141,6 +142,11 @@ public class JSONSerializer {
         if (object instanceof List)
             return serializeList((List<?>)object);
 
+        // is it a List?
+
+        if (object instanceof Set)
+            return serializeSet((Set<?>)object);
+
         // TODO - add List, Set, Map(?), Date, Calendar, BitSet, UUID, java.time classes, ...
 
         // serialize it as an Object
@@ -247,6 +253,19 @@ public class JSONSerializer {
     public static JSONArray serializeList(List<?> list) {
         JSONArray jsonArray = JSONArray.create();
         for (Object item : list)
+            jsonArray.add(serialize(item));
+        return jsonArray;
+    }
+
+    /**
+     * Serialize a {@link Set}.
+     *
+     * @param   list    the {@link List}
+     * @return  the JSON for that {@link List}
+     */
+    public static JSONArray serializeSet(Set<?> set) {
+        JSONArray jsonArray = JSONArray.create();
+        for (Object item : set)
             jsonArray.add(serialize(item));
         return jsonArray;
     }
