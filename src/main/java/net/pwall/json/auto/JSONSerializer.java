@@ -46,6 +46,7 @@ import net.pwall.json.JSONNumberValue;
 import net.pwall.json.JSONObject;
 import net.pwall.json.JSONString;
 import net.pwall.json.JSONValue;
+import net.pwall.json.annotation.JSONIgnore;
 import net.pwall.json.annotation.JSONName;
 
 /**
@@ -407,27 +408,34 @@ public class JSONSerializer {
             String fieldName = field.getName();
             field.setAccessible(true);
 
-            // ignore fields marked as static or transient
+            // ignore fields marked as static or transient, or with @JSONIgnore annotation
 
             int modifiers = field.getModifiers();
             if (!Modifier.isStatic(modifiers) && !Modifier.isTransient(modifiers)) {
-                JSONName nameAnnotation = field.getAnnotation(JSONName.class);
-                if (nameAnnotation != null) {
-                    String nameValue = nameAnnotation.value();
-                    if (nameValue != null)
-                        fieldName = nameValue;
-                }
-                try {
-                    Object value = field.get(object);
-                    if (value != null)
-                        jsonObject.put(fieldName, serialize(value));
-                }
-                catch (JSONException e) {
-                    throw e;
-                }
-                catch (Exception e) {
-                    throw new JSONException("Error serializing " + objectClass + '.' +
-                            fieldName);
+                JSONIgnore ignoreAnnotation = field.getAnnotation(JSONIgnore.class);
+                if (ignoreAnnotation == null) {
+
+                    // check for explicit name annotation
+
+                    JSONName nameAnnotation = field.getAnnotation(JSONName.class);
+                    if (nameAnnotation != null) {
+                        String nameValue = nameAnnotation.value();
+                        if (nameValue != null)
+                            fieldName = nameValue;
+                    }
+
+                    try {
+                        Object value = field.get(object);
+                        if (value != null)
+                            jsonObject.put(fieldName, serialize(value));
+                    }
+                    catch (JSONException e) {
+                        throw e;
+                    }
+                    catch (Exception e) {
+                        throw new JSONException("Error serializing " + objectClass + '.' +
+                                fieldName);
+                    }
                 }
             }
 
