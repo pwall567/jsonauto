@@ -630,6 +630,14 @@ public class JSONSerializerTest {
         assertEquals(jsonObject, JSONSerializer.serializeObject(object1));
     }
 
+    @Test
+    public void testExplicitName() {
+        DummyObject6 object6 = new DummyObject6();
+        object6.setInt1(27);
+        JSONObject jsonObject = JSONObject.create().putValue("fred", 27);
+        assertEquals(jsonObject, JSONSerializer.serialize(object6));
+    }
+
     /**
      * Test that two {@link List}s have the same contents, regardless of order (used for
      * checking serialization of {@link Set}).
