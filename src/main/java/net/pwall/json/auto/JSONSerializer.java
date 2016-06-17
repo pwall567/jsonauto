@@ -2,7 +2,7 @@
  * @(#) JSONSerializer.java
  *
  * jsonauto JSON Auto-serialization Library
- * Copyright (c) 2015 Peter Wall
+ * Copyright (c) 2015, 2016 Peter Wall
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -410,40 +410,45 @@ public class JSONSerializer {
 
             // ignore fields marked as static or transient, or with @JSONIgnore annotation
 
-            int modifiers = field.getModifiers();
-            if (!Modifier.isStatic(modifiers) && !Modifier.isTransient(modifiers)) {
-                JSONIgnore ignoreAnnotation = field.getAnnotation(JSONIgnore.class);
-                if (ignoreAnnotation == null) {
+            if (!fieldStaticOrTransient(field) && !fieldMarkedIgnore(field)) {
 
-                    // check for explicit name annotation
+                // check for explicit name annotation
 
-                    JSONName nameAnnotation = field.getAnnotation(JSONName.class);
-                    if (nameAnnotation != null) {
-                        String nameValue = nameAnnotation.value();
-                        if (nameValue != null)
-                            fieldName = nameValue;
-                    }
+                JSONName nameAnnotation = field.getAnnotation(JSONName.class);
+                if (nameAnnotation != null) {
+                    String nameValue = nameAnnotation.value();
+                    if (nameValue != null)
+                        fieldName = nameValue;
+                }
 
-                    try {
-                        Object value = field.get(object);
-                        if (value != null)
-                            jsonObject.put(fieldName, serialize(value));
-                    }
-                    catch (JSONException e) {
-                        throw e;
-                    }
-                    catch (Exception e) {
-                        throw new JSONException("Error serializing " + objectClass + '.' +
-                                fieldName);
-                    }
+                try {
+                    Object value = field.get(object);
+                    if (value != null)
+                        jsonObject.put(fieldName, serialize(value));
+                }
+                catch (JSONException e) {
+                    throw e;
+                }
+                catch (Exception e) {
+                    throw new JSONException("Error serializing " + objectClass.getName() + '.' +
+                            fieldName);
                 }
             }
 
-            // TODO - handle annotations to modify name used in JSON, to ignore fields
-            // or to output "null" if the field is null
+            // TODO - output "null" if the field is null, when field marked @JSONSerialize
 
         }
 
+    }
+
+    private static boolean fieldStaticOrTransient(Field field) {
+        int modifiers = field.getModifiers();
+        return Modifier.isStatic(modifiers) || Modifier.isTransient(modifiers);
+    }
+
+    private static boolean fieldMarkedIgnore(Field field) {
+        JSONIgnore ignoreAnnotation = field.getAnnotation(JSONIgnore.class);
+        return ignoreAnnotation != null;
     }
 
 }
