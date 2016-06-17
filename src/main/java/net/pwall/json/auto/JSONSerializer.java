@@ -25,10 +25,12 @@
 
 package net.pwall.json.auto;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -94,7 +96,7 @@ public class JSONSerializer {
         // is it a Character?
 
         if (object instanceof Character) {
-            StringBuilder sb = new StringBuilder();
+            StringBuilder sb = new StringBuilder(1);
             sb.append(object);
             return new JSONString(sb);
         }
@@ -143,15 +145,10 @@ public class JSONSerializer {
         if (object instanceof Enum)
             return new JSONString(((Enum<?>)object).name());
 
-        // is it a List?
+        // is it a Collection?
 
-        if (object instanceof List)
-            return serializeList((List<?>)object);
-
-        // is it a Set?
-
-        if (object instanceof Set)
-            return serializeSet((Set<?>)object);
+        if (object instanceof Collection)
+            return serializeCollection((Collection<?>)object);
 
         // is it a Map?
 
@@ -266,29 +263,36 @@ public class JSONSerializer {
     }
 
     /**
-     * Serialize a {@link List}.
+     * Serialize a {@link Collection}.
      *
-     * @param   list    the {@link List}
-     * @return  the JSON for that {@link List}
+     * @param   collection    the {@link Collection}
+     * @return  the JSON for that {@link Collection}
      */
-    public static JSONArray serializeList(List<?> list) {
+    public static JSONArray serializeCollection(Collection<?> collection) {
         JSONArray jsonArray = new JSONArray();
-        for (Object item : list)
+        for (Object item : collection)
             jsonArray.add(serialize(item));
         return jsonArray;
     }
 
     /**
-     * Serialize a {@link Set}.
+     * Serialize a {@link List}.  Synonym for {@link #serializeCollection(Collection)}.
+     *
+     * @param   list    the {@link List}
+     * @return  the JSON for that {@link List}
+     */
+    public static JSONArray serializeList(List<?> list) {
+        return serializeCollection(list);
+    }
+
+    /**
+     * Serialize a {@link Set}.  Synonym for {@link #serializeCollection(Collection)}.
      *
      * @param   set     the {@link Set}
      * @return  the JSON for that {@link Set}
      */
     public static JSONArray serializeSet(Set<?> set) {
-        JSONArray jsonArray = new JSONArray();
-        for (Object item : set)
-            jsonArray.add(serialize(item));
-        return jsonArray;
+        return serializeCollection(set);
     }
 
     /**
@@ -405,15 +409,14 @@ public class JSONSerializer {
         // now, for each field in this class
 
         for (Field field : objectClass.getDeclaredFields()) {
-            String fieldName = field.getName();
-            field.setAccessible(true);
 
-            // ignore fields marked as static or transient, or with @JSONIgnore annotation
+            // ignore fields marked as static or transient, or annotated with @JSONIgnore
 
-            if (!fieldStaticOrTransient(field) && !fieldMarkedIgnore(field)) {
+            if (!fieldStaticOrTransient(field) && !fieldAnnotated(field, JSONIgnore.class)) {
 
                 // check for explicit name annotation
 
+                String fieldName = field.getName();
                 JSONName nameAnnotation = field.getAnnotation(JSONName.class);
                 if (nameAnnotation != null) {
                     String nameValue = nameAnnotation.value();
@@ -421,7 +424,10 @@ public class JSONSerializer {
                         fieldName = nameValue;
                 }
 
+                // add the field to the object if not null
+
                 try {
+                    field.setAccessible(true);
                     Object value = field.get(object);
                     if (value != null)
                         jsonObject.put(fieldName, serialize(value));
@@ -433,9 +439,10 @@ public class JSONSerializer {
                     throw new JSONException("Error serializing " + objectClass.getName() + '.' +
                             fieldName);
                 }
+
             }
 
-            // TODO - output "null" if the field is null, when field marked @JSONSerialize
+            // TODO - output "null" if the field is null, when field marked @JSONAlways (?)
 
         }
 
@@ -446,9 +453,9 @@ public class JSONSerializer {
         return Modifier.isStatic(modifiers) || Modifier.isTransient(modifiers);
     }
 
-    private static boolean fieldMarkedIgnore(Field field) {
-        JSONIgnore ignoreAnnotation = field.getAnnotation(JSONIgnore.class);
-        return ignoreAnnotation != null;
+    private static boolean fieldAnnotated(Field field,
+            Class<? extends Annotation> annotationClass) {
+        return field.getAnnotation(annotationClass) != null;
     }
 
 }
