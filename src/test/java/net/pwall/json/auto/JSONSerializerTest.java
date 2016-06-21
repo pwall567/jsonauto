@@ -575,9 +575,9 @@ public class JSONSerializerTest {
         DummyObject5 object5b = new DummyObject5();
         object5b.setInt1(45);
         list1.add(object5b);
-        JSONArray jsonArray = JSONArray.create();
-        jsonArray.add(JSONObject.create().putValue("dec", "27").putValue("hex", "1B"));
-        jsonArray.add(JSONObject.create().putValue("dec", "45").putValue("hex", "2D"));
+        JSONArray jsonArray = JSONArray.create().
+                addJSON(JSONObject.create().putValue("dec", "27").putValue("hex", "1B")).
+                addJSON(JSONObject.create().putValue("dec", "45").putValue("hex", "2D"));
         assertEquals(jsonArray, JSONSerializer.serialize(list1));
     }
 
@@ -593,10 +593,10 @@ public class JSONSerializerTest {
         DummyObject5 object5c = new DummyObject5();
         object5c.setInt1(127);
         set1.add(object5c);
-        JSONArray jsonArray = JSONArray.create();
-        jsonArray.add(JSONObject.create().putValue("dec", "27").putValue("hex", "1B"));
-        jsonArray.add(JSONObject.create().putValue("dec", "45").putValue("hex", "2D"));
-        jsonArray.add(JSONObject.create().putValue("dec", "127").putValue("hex", "7F"));
+        JSONArray jsonArray = JSONArray.create().
+                addJSON(JSONObject.create().putValue("dec", "27").putValue("hex", "1B")).
+                addJSON(JSONObject.create().putValue("dec", "45").putValue("hex", "2D")).
+                addJSON(JSONObject.create().putValue("dec", "127").putValue("hex", "7F"));
         assertTrue(listSameContents(jsonArray, (JSONArray)JSONSerializer.serialize(set1)));
     }
 
@@ -612,13 +612,13 @@ public class JSONSerializerTest {
         DummyObject5 object5c = new DummyObject5();
         object5c.setInt1(127);
         map1.put("third", object5c);
-        JSONObject jsonObject = JSONObject.create();
-        jsonObject.put("first",
-                JSONObject.create().putValue("dec", "27").putValue("hex", "1B"));
-        jsonObject.put("second",
-                JSONObject.create().putValue("dec", "45").putValue("hex", "2D"));
-        jsonObject.put("third",
-                JSONObject.create().putValue("dec", "127").putValue("hex", "7F"));
+        JSONObject jsonObject = JSONObject.create().
+                putJSON("first",
+                        JSONObject.create().putValue("dec", "27").putValue("hex", "1B")).
+                putJSON("second",
+                        JSONObject.create().putValue("dec", "45").putValue("hex", "2D")).
+                putJSON("third",
+                        JSONObject.create().putValue("dec", "127").putValue("hex", "7F"));
         assertEquals(jsonObject, JSONSerializer.serialize(map1));
     }
 
