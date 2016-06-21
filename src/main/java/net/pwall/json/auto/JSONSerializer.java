@@ -48,6 +48,7 @@ import net.pwall.json.JSONNumberValue;
 import net.pwall.json.JSONObject;
 import net.pwall.json.JSONString;
 import net.pwall.json.JSONValue;
+import net.pwall.json.annotation.JSONAlways;
 import net.pwall.json.annotation.JSONIgnore;
 import net.pwall.json.annotation.JSONName;
 
@@ -400,6 +401,8 @@ public class JSONSerializer {
     private static void addFieldsToJSONObject(JSONObject jsonObject, Class<?> objectClass,
             Object object) {
 
+        // TODO check class-based annotations, including option to apply @JSONAlways on all
+
         // first deal with fields of superclass
 
         Class<?> superClass = objectClass.getSuperclass();
@@ -424,12 +427,12 @@ public class JSONSerializer {
                         fieldName = nameValue;
                 }
 
-                // add the field to the object if not null
+                // add the field to the object if not null, or if annotated with @JSONAlways
 
                 try {
                     field.setAccessible(true);
                     Object value = field.get(object);
-                    if (value != null)
+                    if (value != null || fieldAnnotated(field, JSONAlways.class))
                         jsonObject.put(fieldName, serialize(value));
                 }
                 catch (JSONException e) {
@@ -441,8 +444,6 @@ public class JSONSerializer {
                 }
 
             }
-
-            // TODO - output "null" if the field is null, when field marked @JSONAlways (?)
 
         }
 
