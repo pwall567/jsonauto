@@ -492,6 +492,15 @@ public class JSONSerializerTest {
     }
 
     @Test
+    public void testBitset() {
+        BitSet bitset = new BitSet(4);
+        bitset.set(1);
+        bitset.set(3);
+        JSONArray jsonArray = JSONArray.create().addValue(1).addValue(3);
+        assertEquals(jsonArray, JSONSerializer.serialize(bitset));
+    }
+
+    @Test
     public void testObject() {
         DummyObject object1 = new DummyObject();
         object1.setString1("value1");

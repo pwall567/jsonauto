@@ -29,6 +29,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.BitSet;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
@@ -166,7 +167,12 @@ public class JSONSerializer {
         if (object instanceof Date)
             return serializeDate((Date)object);
 
-        // TODO - add BitSet, UUID, java.time classes, ...
+        // is it a BitSet?
+
+        if (object instanceof BitSet)
+            return serializeBitSet((BitSet)object);
+
+        // TODO - add UUID, java.time classes, ...
 
         // serialize it as an Object (this may not be a satisfactory default behaviour)
 
@@ -371,6 +377,20 @@ public class JSONSerializer {
         sb.append((char)((n / 100) + '0'));
         sb.append((char)(((n / 10) % 10) + '0'));
         sb.append((char)((n % 10) + '0'));
+    }
+
+    /**
+     * Serialize a {@link BitSet}.
+     *
+     * @param   bitSet  the {@link BitSet}
+     * @return  the JSON for that {@link BitSet}
+     */
+    public static JSONArray serializeBitSet(BitSet bitSet) {
+        JSONArray array = new JSONArray();
+        for (int i = 0, n = bitSet.length(); i < n; i++)
+            if (bitSet.get(i))
+                array.addValue(i);
+        return array;
     }
 
     /**
