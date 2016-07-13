@@ -1,8 +1,8 @@
 /*
- * @(#) DummyObject.java
+ * @(#) DummyObject9.java
  *
  * jsonauto JSON Auto-serialization Library
- * Copyright (c) 2015 Peter Wall
+ * Copyright (c) 2016 Peter Wall
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,37 +25,23 @@
 
 package net.pwall.json.auto;
 
-import java.util.Objects;
+import net.pwall.json.JSONValue;
 
 /**
- * Dummy object for testing JSON auto-serialization and deserialization.
+ * Dummy object for testing use of JSONValue in object.
  *
  * @author Peter Wall
  */
-public class DummyObject {
+public class DummyObject9 {
 
-    private String string1;
+    private JSONValue json;
 
-    public String getString1() {
-        return string1;
+    public JSONValue getJson() {
+        return json;
     }
 
-    public void setString1(String string1) {
-        this.string1 = string1;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (!(obj instanceof DummyObject))
-            return false;
-        if (this == obj)
-            return true;
-        return Objects.equals(string1, ((DummyObject)obj).string1);
-    }
-
-    @Override
-    public int hashCode() {
-        return string1 == null ? 0 : string1.hashCode();
+    public void setJson(JSONValue json) {
+        this.json = json;
     }
 
 }

@@ -1,8 +1,8 @@
 /*
- * @(#) DummyObject.java
+ * @(#) DeserializeStringTest.java
  *
  * jsonauto JSON Auto-serialization Library
- * Copyright (c) 2015 Peter Wall
+ * Copyright (c) 2016 Peter Wall
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,37 +25,31 @@
 
 package net.pwall.json.auto;
 
-import java.util.Objects;
+import static org.junit.Assert.*;
+
+import org.junit.Test;
 
 /**
- * Dummy object for testing JSON auto-serialization and deserialization.
- *
- * @author Peter Wall
+ * Test the {@link JSONDeserializer#deserializeString(Class, String)} function.
  */
-public class DummyObject {
+public class DeserializeStringTest {
 
-    private String string1;
-
-    public String getString1() {
-        return string1;
+    @Test
+    public void testString() {
+        String result = "abcdef";
+        assertEquals(result, JSONDeserializer.deserializeString(String.class, "abcdef"));
+        result = "";
+        assertEquals(result, JSONDeserializer.deserializeString(String.class, ""));
     }
 
-    public void setString1(String string1) {
-        this.string1 = string1;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (!(obj instanceof DummyObject))
-            return false;
-        if (this == obj)
-            return true;
-        return Objects.equals(string1, ((DummyObject)obj).string1);
-    }
-
-    @Override
-    public int hashCode() {
-        return string1 == null ? 0 : string1.hashCode();
+    @Test
+    public void testInteger() {
+        Integer result = Integer.valueOf(27);
+        assertEquals(result, JSONDeserializer.deserializeString(Integer.class, "27"));
+        result = Integer.valueOf(0);
+        assertEquals(result, JSONDeserializer.deserializeString(Integer.class, "0"));
+        result = Integer.valueOf(-1);
+        assertEquals(result, JSONDeserializer.deserializeString(Integer.class, "-1"));
     }
 
 }

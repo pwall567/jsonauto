@@ -2,7 +2,7 @@
  * @(#) JSONSerializerTest.java
  *
  * jsonauto JSON Auto-serialization Library
- * Copyright (c) 2015 Peter Wall
+ * Copyright (c) 2015, 2016 Peter Wall
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -44,6 +44,7 @@ import net.pwall.json.JSONInteger;
 import net.pwall.json.JSONLong;
 import net.pwall.json.JSONObject;
 import net.pwall.json.JSONString;
+import net.pwall.json.JSONValue;
 
 import org.junit.Test;
 
@@ -663,6 +664,15 @@ public class JSONSerializerTest {
         object8.setValue2("xyz");
         JSONObject jsonObject = JSONObject.create().putNull("value1").putValue("value2", "xyz");
         assertEquals(jsonObject, JSONSerializer.serialize(object8));
+    }
+
+    @Test
+    public void testIncludedJSON() {
+        DummyObject9 object9 = new DummyObject9();
+        JSONValue json = new JSONDouble(0.1);
+        object9.setJson(json);
+        JSONObject jsonObject = JSONObject.create().putJSON("json", json);
+        assertEquals(jsonObject, JSONSerializer.serialize(object9));
     }
 
     /**

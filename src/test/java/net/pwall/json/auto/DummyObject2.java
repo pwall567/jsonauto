@@ -25,6 +25,8 @@
 
 package net.pwall.json.auto;
 
+import java.util.Objects;
+
 /**
  * Dummy object for testing JSON auto-serialization and deserialization.
  *
@@ -49,6 +51,21 @@ public class DummyObject2 {
 
     public void setInt1(int int1) {
         this.int1 = int1;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof DummyObject2))
+            return false;
+        if (this == obj)
+            return true;
+        DummyObject2 obj2 = (DummyObject2)obj;
+        return Objects.equals(string1, obj2.string1) && int1 == obj2.int1;
+    }
+
+    @Override
+    public int hashCode() {
+        return (string1 == null ? 0 : string1.hashCode()) + int1;
     }
 
 }

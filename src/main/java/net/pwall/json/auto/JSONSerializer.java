@@ -49,6 +49,7 @@ import net.pwall.json.JSONNumberValue;
 import net.pwall.json.JSONObject;
 import net.pwall.json.JSONString;
 import net.pwall.json.JSONValue;
+import net.pwall.json.JSONZero;
 import net.pwall.json.annotation.JSONAlways;
 import net.pwall.json.annotation.JSONIgnore;
 import net.pwall.json.annotation.JSONName;
@@ -80,15 +81,35 @@ public class JSONSerializer {
         if (object == null)
             return null;
 
+        // is it already a JSONValue?
+
+        if (object instanceof JSONValue)
+            return (JSONValue)object;
+
         // is it a CharSequence (e.g. String)?
 
         if (object instanceof CharSequence)
             return new JSONString((CharSequence)object);
 
-        // is it a Number (Integer, Double etc.)?
+        // is it an Integer?
 
-        if (object instanceof Number)
-            return serializeNumber((Number)object);
+        if (object instanceof Integer || object instanceof Short || object instanceof Byte)
+            return JSONInteger.valueOf(((Number)object).intValue());
+
+        // is it a Long?
+
+        if (object instanceof Long)
+            return JSONLong.valueOf(((Long)object).longValue());
+
+        // is it a Double?
+
+        if (object instanceof Double)
+            return JSONDouble.valueOf(((Double)object).doubleValue());
+
+        // is it a Float?
+
+        if (object instanceof Float)
+            return JSONFloat.valueOf(((Float)object).floatValue());
 
         // is it a Boolean?
 
@@ -190,24 +211,38 @@ public class JSONSerializer {
      */
     public static JSONNumberValue serializeNumber(Number number) {
 
+        // is it an Integer?
+
+        if (number instanceof Integer || number instanceof Short || number instanceof Byte)
+            return JSONInteger.valueOf(number.intValue());
+
         // is it a Long?
 
         if (number instanceof Long)
-            return JSONLong.valueOf((Long)number);
+            return JSONLong.valueOf(number.longValue());
 
         // is it a Double?
 
         if (number instanceof Double)
-            return JSONDouble.valueOf((Double)number);
+            return JSONDouble.valueOf(number.doubleValue());
 
         // is it a Float?
 
         if (number instanceof Float)
-            return JSONFloat.valueOf((Float)number);
+            return JSONFloat.valueOf(number.floatValue());
 
-        // treat it as an Integer
+        // find the best representation
 
-        return JSONInteger.valueOf(number.intValue());
+        long longValue = number.longValue();
+        double doubleValue = number.doubleValue();
+        if (doubleValue != longValue)
+            return JSONDouble.valueOf(number.doubleValue());
+
+        int intValue = number.intValue();
+        if (longValue != intValue)
+            return JSONLong.valueOf(longValue);
+
+        return intValue == 0 ? new JSONZero() : JSONInteger.valueOf(intValue);
     }
 
     /**

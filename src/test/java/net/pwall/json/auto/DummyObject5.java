@@ -2,7 +2,7 @@
  * @(#) DummyObject5.java
  *
  * jsonauto JSON Auto-serialization Library
- * Copyright (c) 2015 Peter Wall
+ * Copyright (c) 2015, 2016 Peter Wall
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,7 +25,11 @@
 
 package net.pwall.json.auto;
 
+import java.util.Objects;
+
+import net.pwall.json.JSONException;
 import net.pwall.json.JSONObject;
+import net.pwall.json.JSONValue;
 
 /**
  * Dummy object for testing JSON auto-serialization and deserialization.
@@ -48,6 +52,31 @@ public class DummyObject5 {
     private JSONObject toJSON() {
         return JSONObject.create().putValue("dec", Integer.toString(int1)).
                 putValue("hex", Integer.toHexString(int1).toUpperCase());
+    }
+
+    @SuppressWarnings("unused")
+    private static DummyObject5 fromJSON(JSONValue json) {
+        JSONObject jsonObject = (JSONObject)Objects.requireNonNull(json);
+        int decValue = Integer.parseInt(jsonObject.getString("dec"));
+        if (decValue != Integer.parseInt(jsonObject.getString("hex"), 16))
+            throw new JSONException("Inconsistent values");
+        DummyObject5 result = new DummyObject5();
+        result.setInt1(decValue);
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof DummyObject5))
+            return false;
+        if (o == this)
+            return true;
+        return int1 == ((DummyObject5)o).int1;
+    }
+
+    @Override
+    public int hashCode() {
+        return int1;
     }
 
 }
