@@ -64,6 +64,7 @@ public class JSONDeserializer {
      * @param   json            the JSON representation of the object
      * @return  the object
      * @throws  JSONException   if the JSON can not be deserialized to the required type
+     * @throws  NullPointerException if the resultClass parameter is {@code null}
      */
     public static <T> T deserialize(Class<T> resultClass, JSONValue json) {
         return deserialize(resultClass, null, json);
@@ -77,6 +78,7 @@ public class JSONDeserializer {
      * @param   json            the JSON representation of the object
      * @return  the object
      * @throws  JSONException   if the JSON can not be deserialized to the required type
+     * @throws  NullPointerException if the resultClass parameter is {@code null}
      */
     @SuppressWarnings("unchecked")
     public static <T> T deserialize(Class<T> resultClass, Type[] typeArgs, JSONValue json) {
@@ -150,8 +152,9 @@ public class JSONDeserializer {
                     }
                 }
                 catch (Exception e) {
-                    throw new IllegalArgumentException("Error deserializing enum");
+                    // drop through
                 }
+                throw new IllegalArgumentException("Error deserializing enum");
             }
 
             // does the target class have a constructor that takes String?
@@ -275,13 +278,24 @@ public class JSONDeserializer {
         throw new JSONException("Can't deserialize " + json.getClass());
     }
 
+    /**
+     * Deserialize an object.
+     *
+     * @param   resultClass     the class of the result object
+     * @param   json            the JSON representation of the object
+     * @return  the object
+     * @throws  NullPointerException if the resultClass parameter is {@code null}
+     */
     public static <T> T deserializeObject(Class<T> resultClass, JSONObject object) {
         try {
             Constructor<T> constructor = resultClass.getConstructor();
             constructor.setAccessible(true);
             T result = constructor.newInstance();
             for (Map.Entry<String, JSONValue> entry : object.entrySet()) {
+                // TODO use setter method if available?
                 Field field = findField(resultClass, entry.getKey());
+                if (field == null)
+                    throw new JSONException("Can't find field for " + entry.getKey());
                 int modifiers = field.getModifiers();
                 if (Modifier.isStatic(modifiers) || Modifier.isTransient(modifiers) ||
                         field.isAnnotationPresent(JSONIgnore.class))
@@ -298,7 +312,7 @@ public class JSONDeserializer {
             throw e;
         }
         catch (Exception e) {
-            throw new JSONException("Can't deserialize object as " + resultClass);
+            throw new JSONException("Can't deserialize object as " + resultClass, e);
         }
     }
 
@@ -364,6 +378,7 @@ public class JSONDeserializer {
      * @return  the {@link Map}
      * @throws  JSONException if the type arguments are incorrect, if the map class can't be
      *          instantiated, or if the deserialization of the items throws an exception
+     * @throws  NullPointerException if the mapClass or object parameter is {@code null}
      */
     @SuppressWarnings("unchecked")
     public static <M extends Map<K, V>, K, V> Map<K, V> deserializeMap(Class<M> mapClass,
@@ -413,6 +428,7 @@ public class JSONDeserializer {
      * @return  the {@link Collection}
      * @throws  JSONException if the type arguments are incorrect, if the collection class can't
      *          be instantiated, or if the deserialization of the items throws an exception
+     * @throws  NullPointerException if the collectionClass or array parameter is {@code null}
      */
     @SuppressWarnings("unchecked")
     public static <C extends Collection<T>, T> Collection<T> deserializeCollection(
@@ -449,6 +465,7 @@ public class JSONDeserializer {
      * @param   arrayClass      the class of the array
      * @param   array           a {@link JSONArray} to be deserialized into an array
      * @return  the result array
+     * @throws  NullPointerException if either parameter is {@code null}
      */
     @SuppressWarnings("unchecked")
     public static <T> T deserializePrimitiveArray(Class<T> arrayClass, JSONArray array) {
@@ -505,6 +522,7 @@ public class JSONDeserializer {
      * @param   itemClass       the class of the array item
      * @param   array           a {@link JSONArray} to be deserialized into an array
      * @return  the result array
+     * @throws  NullPointerException if either parameter is {@code null}
      */
     public static <T> T[] deserializeArray(Class<T> itemClass, JSONArray array) {
         int n = array.size();
