@@ -336,4 +336,23 @@ public class JSONDeserializerTest {
         assertEquals(expected, JSONDeserializer.deserialize(DummyObject2.class, json));
     }
 
+    @Test
+    public void testObject3() {
+        JSONObject json = JSONObject.create().putValue("string1", "abc").
+                putValue("integer1", 27);
+        JSONObject json2 = JSONObject.create().putValue("string1", "xyz");
+        json.putJSON("dummy1", json2);
+        JSONArray json3 = JSONArray.create().addValue(5).addValue(4).addValue(3).addValue(2);
+        json.put("array1", json3);
+        DummyObject3 expected = new DummyObject3();
+        expected.setString1("abc");
+        expected.setInteger1(27);
+        DummyObject expected2 = new DummyObject();
+        expected2.setString1("xyz");
+        expected.setDummy1(expected2);
+        int[] exp3 = new int[] { 5, 4, 3, 2 };
+        expected.setArray1(exp3);
+        assertEquals(expected, JSONDeserializer.deserialize(DummyObject3.class, json));
+    }
+
 }

@@ -25,6 +25,9 @@
 
 package net.pwall.json.auto;
 
+import java.util.Arrays;
+import java.util.Objects;
+
 /**
  * Dummy object for testing JSON auto-serialization and deserialization.
  *
@@ -67,6 +70,36 @@ public class DummyObject3 {
 
     public void setArray1(int[] array1) {
         this.array1 = array1;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof DummyObject3))
+            return false;
+        if (this == obj)
+            return true;
+        DummyObject3 obj3 = (DummyObject3)obj;
+        if (!Objects.equals(string1, obj3.string1))
+            return false;
+        if (!Objects.equals(integer1, obj3.integer1))
+            return false;
+        if (!Objects.equals(dummy1, obj3.dummy1))
+            return false;
+        if (!Arrays.equals(array1, obj3.array1))
+            return false;
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = string1 == null ? 0 : string1.hashCode();
+        if (integer1 != null)
+            result ^= integer1.hashCode();
+        if (dummy1 != null)
+            result ^= dummy1.hashCode();
+        if (array1 != null)
+            result ^= Arrays.hashCode(array1);
+        return result;
     }
 
 }
