@@ -118,95 +118,13 @@ public class JSONDeserializer {
 
         // is the JSON a string?
 
-        if (json instanceof JSONString) {
-
-            String s = json.toString();
-
-            // is the target class String?
-
-            if (resultClass.equals(String.class))
-                return (T)s;
-
-            // is the target class Character?
-
-            if (resultClass.equals(Character.class)) {
-                if (s.length() != 1)
-                    throw new JSONException("Character must be string of length 1");
-                return (T)Character.valueOf(s.charAt(0));
-            }
-
-            // is the target class array of char?
-
-            if (resultClass.isArray() && resultClass.getComponentType().equals(char.class))
-                return (T)json.toString().toCharArray();
-
-            // is the target class an enum?
-
-            if (Enum.class.isAssignableFrom(resultClass)) {
-                try {
-                    Method valuesMethod = resultClass.getMethod("values");
-                    Enum<?>[] values = (Enum<?>[])valuesMethod.invoke(null);
-                    for (int i = 0; i < values.length; i++) {
-                        if (values[i].name().equals(s))
-                            return (T)values[i];
-                    }
-                }
-                catch (Exception e) {
-                    // drop through
-                }
-                throw new IllegalArgumentException("Error deserializing enum");
-            }
-
-            // does the target class have a constructor that takes String?
-            // (e.g. StringBuilder, Integer, ... )
-
-            try {
-                Constructor<T> constructor = resultClass.getConstructor(String.class);
-                return constructor.newInstance(s);
-            }
-            catch (Exception e) {
-                throw new JSONException("Can't deserialize string as " + resultClass);
-            }
-
-        }
+        if (json instanceof JSONString)
+            return deserializeStringInternal(resultClass, json.toString());
 
         // is the JSON a number?
 
-        if (json instanceof Number) {
-
-            // is the target class Integer?
-
-            if (resultClass.equals(Integer.class) || resultClass.equals(int.class))
-                return (T)Integer.valueOf(((Number)json).intValue());
-
-            // is the target class Long?
-
-            if (resultClass.equals(Long.class) || resultClass.equals(long.class))
-                return (T)Long.valueOf(((Number)json).longValue());
-
-            // is the target class Double?
-
-            if (resultClass.equals(Double.class) || resultClass.equals(double.class))
-                return (T)Double.valueOf(((Number)json).doubleValue());
-
-            // is the target class Float?
-
-            if (resultClass.equals(Float.class) || resultClass.equals(float.class))
-                return (T)Float.valueOf(((Number)json).floatValue());
-
-            // is the target class Short?
-
-            if (resultClass.equals(Short.class) || resultClass.equals(short.class))
-                return (T)Short.valueOf(((Number)json).shortValue());
-
-            // is the target class Byte?
-
-            if (resultClass.equals(Byte.class) || resultClass.equals(byte.class))
-                return (T)Byte.valueOf(((Number)json).byteValue());
-
-            throw new JSONException("Can't deserialize number as " + resultClass);
-
-        }
+        if (json instanceof Number)
+            return deserializeNumberInternal(resultClass, (Number)json);
 
         // is the JSON a boolean?
 
@@ -249,7 +167,7 @@ public class JSONDeserializer {
             // is the target any derived class from Collection?
 
             if (Collection.class.isAssignableFrom(resultClass))
-                return (T)deserializeCollection((Class<?>)resultClass, typeArgs,
+                return (T)deserializeCollection(resultClass, typeArgs,
                         (JSONArray)json);
 
             throw new JSONException("Can't deserialize array as " + resultClass);
@@ -268,13 +186,145 @@ public class JSONDeserializer {
             // is the target any derived class from Map?
 
             if (Map.class.isAssignableFrom(resultClass))
-                return (T)deserializeMap((Class<?>)resultClass, typeArgs, (JSONObject)json);
+                return (T)deserializeMap(resultClass, typeArgs, (JSONObject)json);
 
             return deserializeObject(resultClass, (JSONObject)json);
 
         }
 
         throw new JSONException("Can't deserialize " + json.getClass());
+    }
+
+    /**
+     * Deserialize a string.
+     *
+     * @param   resultClass     the class of the result object
+     * @param   s               the string
+     * @return  the object
+     * @throws  JSONException   if the string can not be deserialized to the required type
+     * @throws  NullPointerException if the resultClass parameter is {@code null}
+     */
+    public static <T> T deserializeString(Class<T> resultClass, String s) {
+
+        Objects.requireNonNull(resultClass);
+
+        // check for null
+
+        if (s == null)
+            return null;
+
+        return deserializeStringInternal(resultClass, s);
+
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <T> T deserializeStringInternal(Class<T> resultClass, String s) {
+
+        // is the target class String?
+
+        if (resultClass.equals(String.class))
+            return (T)s;
+
+        // is the target class Character?
+
+        if (resultClass.equals(Character.class)) {
+            if (s.length() != 1)
+                throw new JSONException("Character must be string of length 1");
+            return (T)Character.valueOf(s.charAt(0));
+        }
+
+        // is the target class array of char?
+
+        if (resultClass.isArray() && resultClass.getComponentType().equals(char.class))
+            return (T)s.toCharArray();
+
+        // is the target class an enum?
+
+        if (Enum.class.isAssignableFrom(resultClass)) {
+            try {
+                Method valuesMethod = resultClass.getMethod("values");
+                Enum<?>[] values = (Enum<?>[])valuesMethod.invoke(null);
+                for (int i = 0; i < values.length; i++) {
+                    if (values[i].name().equals(s))
+                        return (T)values[i];
+                }
+            }
+            catch (Exception e) {
+                // drop through
+            }
+            throw new IllegalArgumentException("Error deserializing enum");
+        }
+
+        // does the target class have a constructor that takes String?
+        // (e.g. StringBuilder, Integer, ... )
+
+        try {
+            Constructor<T> constructor = resultClass.getConstructor(String.class);
+            return constructor.newInstance(s);
+        }
+        catch (Exception e) {
+            throw new JSONException("Can't deserialize string as " + resultClass);
+        }
+
+    }
+
+    /**
+     * Deserialize a number.
+     *
+     * @param   resultClass     the class of the result object
+     * @param   number          the number
+     * @return  the object
+     * @throws  JSONException   if the number can not be deserialized to the required type
+     * @throws  NullPointerException if the resultClass parameter is {@code null}
+     */
+    public static <T> T deserializeNumber(Class<T> resultClass, Number number) {
+
+        Objects.requireNonNull(resultClass);
+
+        // check for null
+
+        if (number == null)
+            return null;
+
+        return deserializeNumberInternal(resultClass, number);
+
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <T> T deserializeNumberInternal(Class<T> resultClass, Number number) {
+
+        // is the target class Integer?
+
+        if (resultClass.equals(Integer.class) || resultClass.equals(int.class))
+            return (T)Integer.valueOf(number.intValue());
+
+        // is the target class Long?
+
+        if (resultClass.equals(Long.class) || resultClass.equals(long.class))
+            return (T)Long.valueOf(number.longValue());
+
+        // is the target class Double?
+
+        if (resultClass.equals(Double.class) || resultClass.equals(double.class))
+            return (T)Double.valueOf(number.doubleValue());
+
+        // is the target class Float?
+
+        if (resultClass.equals(Float.class) || resultClass.equals(float.class))
+            return (T)Float.valueOf(number.floatValue());
+
+        // is the target class Short?
+
+        if (resultClass.equals(Short.class) || resultClass.equals(short.class))
+            return (T)Short.valueOf(number.shortValue());
+
+        // is the target class Byte?
+
+        if (resultClass.equals(Byte.class) || resultClass.equals(byte.class))
+            return (T)Byte.valueOf(number.byteValue());
+
+        throw new JSONException("Can't deserialize number as " + resultClass);
+
     }
 
     /**
@@ -291,10 +341,11 @@ public class JSONDeserializer {
             constructor.setAccessible(true);
             T result = constructor.newInstance();
             for (Map.Entry<String, JSONValue> entry : object.entrySet()) {
+                String name = entry.getKey();
                 // TODO use setter method if available?
-                Field field = findField(resultClass, entry.getKey());
+                Field field = findField(resultClass, name);
                 if (field == null)
-                    throw new JSONException("Can't find field for " + entry.getKey());
+                    throw new JSONException("Can't find field for " + name);
                 int modifiers = field.getModifiers();
                 if (Modifier.isStatic(modifiers) || Modifier.isTransient(modifiers) ||
                         field.isAnnotationPresent(JSONIgnore.class))
@@ -328,43 +379,6 @@ public class JSONDeserializer {
         }
         Class<?> superClass = resultClass.getSuperclass();
         return superClass == null ? null : findField(superClass, name);
-    }
-
-    @SuppressWarnings("unchecked")
-    public static <T> T deserializeString(Class<T> resultClass, String s) {
-
-        Objects.requireNonNull(resultClass);
-
-        // check for null
-
-        if (s == null)
-            return null;
-
-        // is it a String?
-
-        if (resultClass.equals(String.class))
-            return (T)s;
-
-        // is it a Character?
-
-        if (resultClass.equals(Character.class)) {
-            if (s.length() != 1)
-                throw new JSONException("Character must be string of length 1");
-            return (T)Character.valueOf(s.charAt(0));
-        }
-
-        // any others?
-
-        // is there a constructor that takes String? (includes StringBuilder, Integer etc.)
-
-        try {
-            Constructor<T> constructor = resultClass.getConstructor(String.class);
-            return constructor.newInstance(s);
-        }
-        catch (Exception e) {
-            throw new JSONException("Can't deserialize string as " + resultClass);
-        }
-
     }
 
     /**
