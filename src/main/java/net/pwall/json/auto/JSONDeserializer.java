@@ -237,20 +237,20 @@ public class JSONDeserializer {
             // is the target a Set?
 
             if (resultClass.equals(Set.class))
-                return (T)deserializeCollection((Class<? extends Collection<?>>)HashSet.class,
-                        typeArgs, (JSONArray)json);
+                return (T)deserializeCollection((Class<?>)HashSet.class, typeArgs,
+                        (JSONArray)json);
 
             // is the target a List or Collection?
 
             if (resultClass.equals(List.class) || resultClass.equals(Collection.class))
-                return (T)deserializeCollection((Class<? extends Collection<?>>)ArrayList.class,
-                        typeArgs, (JSONArray)json);
+                return (T)deserializeCollection((Class<?>)ArrayList.class, typeArgs,
+                        (JSONArray)json);
 
             // is the target any derived class from Collection?
 
             if (Collection.class.isAssignableFrom(resultClass))
-                return (T)deserializeCollection((Class<? extends Collection<?>>)resultClass,
-                        typeArgs, (JSONArray)json);
+                return (T)deserializeCollection((Class<?>)resultClass, typeArgs,
+                        (JSONArray)json);
 
             throw new JSONException("Can't deserialize array as " + resultClass);
 
@@ -268,8 +268,7 @@ public class JSONDeserializer {
             // is the target any derived class from Map?
 
             if (Map.class.isAssignableFrom(resultClass))
-                return (T)deserializeMap((Class<? extends Map<?, ?>>)resultClass, typeArgs,
-                        (JSONObject)json);
+                return (T)deserializeMap((Class<?>)resultClass, typeArgs, (JSONObject)json);
 
             return deserializeObject(resultClass, (JSONObject)json);
 
@@ -381,8 +380,8 @@ public class JSONDeserializer {
      * @throws  NullPointerException if the mapClass or object parameter is {@code null}
      */
     @SuppressWarnings("unchecked")
-    public static <M extends Map<K, V>, K, V> Map<K, V> deserializeMap(Class<M> mapClass,
-            Type[] typeArgs, JSONObject object) {
+    public static <K, V> Map<K, V> deserializeMap(Class<?> mapClass, Type[] typeArgs,
+            JSONObject object) {
         if (typeArgs == null || typeArgs.length != 2)
             throw new JSONException("Missing or incorrect type arguments for Map");
         Class<K> keyClass = null;
@@ -404,7 +403,7 @@ public class JSONDeserializer {
             valueTypeArgs = pt.getActualTypeArguments();
         }
         try {
-            Map<K, V> result = mapClass.newInstance();
+            Map<K, V> result = (Map<K, V>)mapClass.newInstance();
             for (Map.Entry<String, JSONValue> entry : object.entrySet())
                 result.put(deserializeString(keyClass, entry.getKey()),
                         deserialize(valueClass, valueTypeArgs, entry.getValue()));
@@ -431,8 +430,8 @@ public class JSONDeserializer {
      * @throws  NullPointerException if the collectionClass or array parameter is {@code null}
      */
     @SuppressWarnings("unchecked")
-    public static <C extends Collection<T>, T> Collection<T> deserializeCollection(
-            Class<C> collectionClass, Type[] typeArgs, JSONArray array) {
+    public static <T> Collection<T> deserializeCollection(Class<?> collectionClass,
+            Type[] typeArgs, JSONArray array) {
         if (typeArgs == null || typeArgs.length != 1)
             throw new JSONException("Missing or incorrect type arguments for Collection");
         Class<T> itemClass = null;
@@ -446,7 +445,7 @@ public class JSONDeserializer {
             itemTypeArgs = pt.getActualTypeArguments();
         }
         try {
-            Collection<T> result = collectionClass.newInstance();
+            Collection<T> result = (Collection<T>)collectionClass.newInstance();
             for (JSONValue value : array)
                 result.add(deserialize(itemClass, itemTypeArgs, value));
             return result;
