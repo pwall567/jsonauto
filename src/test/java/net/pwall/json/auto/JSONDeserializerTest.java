@@ -355,4 +355,21 @@ public class JSONDeserializerTest {
         assertEquals(expected, JSONDeserializer.deserialize(DummyObject3.class, json));
     }
 
+    @Test
+    public void testObject4() {
+        JSONObject json = JSONObject.create().putValue("string1", "abc").putValue("int1", 27);
+        DummyObject4 expected = new DummyObject4();
+        expected.setString1("abc");
+        expected.setInt1(27);
+        assertEquals(expected, JSONDeserializer.deserialize(DummyObject4.class, json));
+    }
+
+    @Test
+    public void testObject6() {
+        JSONObject json = JSONObject.create().putValue("fred", 2796);
+        DummyObject6 expected = new DummyObject6();
+        expected.setInt1(2796);
+        assertEquals(expected, JSONDeserializer.deserialize(DummyObject6.class, json));
+    }
+
 }

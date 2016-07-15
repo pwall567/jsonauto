@@ -121,4 +121,16 @@ public class TestTwoWay {
         assertEquals(a, b, 1e-64);
     }
 
+    @Test
+    public void testEnum() {
+        DummyEnum a = DummyEnum.ALPHA;
+        DummyEnum b = JSONDeserializer.deserialize(DummyEnum.class,
+                JSONSerializer.serialize(a));
+        assertEquals(a, b);
+        a = DummyEnum.GAMMA;
+        b = JSONDeserializer.deserialize(DummyEnum.class,
+                JSONSerializer.serialize(a));
+        assertEquals(a, b);
+    }
+
 }

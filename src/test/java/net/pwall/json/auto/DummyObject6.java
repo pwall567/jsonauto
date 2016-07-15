@@ -45,4 +45,18 @@ public class DummyObject6 {
         this.int1 = int1;
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof DummyObject6))
+            return false;
+        if (this == obj)
+            return true;
+        return int1 == ((DummyObject6)obj).int1;
+    }
+
+    @Override
+    public int hashCode() {
+        return int1;
+    }
+
 }

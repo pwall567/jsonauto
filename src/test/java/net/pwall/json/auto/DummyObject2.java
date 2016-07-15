@@ -2,7 +2,7 @@
  * @(#) DummyObject2.java
  *
  * jsonauto JSON Auto-serialization Library
- * Copyright (c) 2015 Peter Wall
+ * Copyright (c) 2015, 2016 Peter Wall
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
