@@ -27,6 +27,8 @@ package net.pwall.json.auto;
 
 import static org.junit.Assert.*;
 
+import java.util.Date;
+
 import org.junit.Test;
 
 /**
@@ -130,6 +132,13 @@ public class TestTwoWay {
         a = DummyEnum.GAMMA;
         b = JSONDeserializer.deserialize(DummyEnum.class,
                 JSONSerializer.serialize(a));
+        assertEquals(a, b);
+    }
+
+    @Test
+    public void testDate() {
+        Date a = new Date();
+        Date b = JSONDeserializer.deserialize(Date.class, JSONSerializer.serialize(a));
         assertEquals(a, b);
     }
 

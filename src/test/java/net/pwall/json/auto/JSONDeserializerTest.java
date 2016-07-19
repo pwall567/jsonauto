@@ -32,6 +32,8 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -370,6 +372,39 @@ public class JSONDeserializerTest {
         DummyObject6 expected = new DummyObject6();
         expected.setInt1(2796);
         assertEquals(expected, JSONDeserializer.deserialize(DummyObject6.class, json));
+    }
+
+    @Test
+    public void testCalendar() {
+        JSONString json = new JSONString("2016-07-18T20:01:23.456+10:00");
+        Calendar cal = Calendar.getInstance();
+        cal.set(2016, 6, 18, 20, 1, 23);
+        cal.set(Calendar.MILLISECOND, 456);
+        cal.set(Calendar.ZONE_OFFSET, 10 * 60 * 60 * 1000);
+        assertTrue(calendarEquals(cal, JSONDeserializer.deserialize(Calendar.class, json)));
+    }
+
+    @Test
+    public void testDate() {
+        JSONString json = new JSONString("2016-07-18T20:01:23.456+10:00");
+        Calendar cal = Calendar.getInstance();
+        cal.set(2016, 6, 18, 20, 1, 23);
+        cal.set(Calendar.MILLISECOND, 456);
+        cal.set(Calendar.ZONE_OFFSET, 10 * 60 * 60 * 1000);
+        Date expected = cal.getTime();
+        assertEquals(expected, JSONDeserializer.deserialize(Date.class, json));
+    }
+
+    private static final int[] calendarFields = { Calendar.YEAR, Calendar.MONTH,
+        Calendar.DAY_OF_MONTH, Calendar.HOUR_OF_DAY, Calendar.MINUTE, Calendar.SECOND,
+        Calendar.MILLISECOND, Calendar.ZONE_OFFSET };
+
+    private boolean calendarEquals(Calendar a, Calendar b) {
+        for (int i : calendarFields) {
+            if (a.get(i) != b.get(i))
+                return false;
+        }
+        return a.getTime().equals(b.getTime());
     }
 
 }

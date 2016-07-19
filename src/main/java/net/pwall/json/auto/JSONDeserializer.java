@@ -33,7 +33,9 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -49,6 +51,7 @@ import net.pwall.json.JSONString;
 import net.pwall.json.JSONValue;
 import net.pwall.json.annotation.JSONIgnore;
 import net.pwall.json.annotation.JSONName;
+import net.pwall.util.ISO8601Date;
 
 /**
  * JSON auto-deserialization class.
@@ -237,6 +240,28 @@ public class JSONDeserializer {
 
         if (resultClass.isArray() && resultClass.getComponentType().equals(char.class))
             return (T)s.toCharArray();
+
+        // is the target class Calendar?
+
+        if (resultClass.equals(Calendar.class)) {
+            try {
+                return (T)ISO8601Date.decode(s);
+            }
+            catch (Exception e) {
+                throw new JSONException("Can't deserialize Calendar", e);
+            }
+        }
+
+        // is the target class Date?
+
+        if (resultClass.equals(Date.class)) {
+            try {
+                return (T)ISO8601Date.decode(s).getTime();
+            }
+            catch (Exception e) {
+                throw new JSONException("Can't deserialize Date", e);
+            }
+        }
 
         // is the target class an enum?
 
