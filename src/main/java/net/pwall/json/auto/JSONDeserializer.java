@@ -221,7 +221,8 @@ public class JSONDeserializer {
     }
 
     @SuppressWarnings("unchecked")
-    private static <T> T deserializeStringInternal(Class<T> resultClass, String s) {
+    private static <T, E extends Enum<E>> T deserializeStringInternal(Class<T> resultClass,
+            String s) {
 
         // is the target class String?
 
@@ -267,25 +268,18 @@ public class JSONDeserializer {
 
         if (Enum.class.isAssignableFrom(resultClass)) {
             try {
-                Method valuesMethod = resultClass.getMethod("values");
-                Enum<?>[] values = (Enum<?>[])valuesMethod.invoke(null);
-                for (int i = 0; i < values.length; i++) {
-                    if (values[i].name().equals(s))
-                        return (T)values[i];
-                }
+                return (T)Enum.valueOf((Class<E>)resultClass, s);
             }
             catch (Exception e) {
-                // drop through
+                throw new IllegalArgumentException("Error deserializing enum");
             }
-            throw new IllegalArgumentException("Error deserializing enum");
         }
 
-        // does the target class have a constructor that takes String?
+        // does the target class have a public constructor that takes String?
         // (e.g. StringBuilder, Integer, ... )
 
         try {
-            Constructor<T> constructor = resultClass.getConstructor(String.class);
-            return constructor.newInstance(s);
+            return resultClass.getConstructor(String.class).newInstance(s);
         }
         catch (Exception e) {
             throw new JSONException("Can't deserialize string as " + resultClass);
