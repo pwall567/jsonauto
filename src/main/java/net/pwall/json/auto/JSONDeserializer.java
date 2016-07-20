@@ -173,6 +173,8 @@ public class JSONDeserializer {
             if (Collection.class.isAssignableFrom(resultClass))
                 return (T)deserializeCollection(resultClass, typeArgs, array);
 
+            // is the target a BitSet?
+
             if (resultClass.equals(BitSet.class)) {
                 BitSet result = new BitSet();
                 for (int i = 0, n = array.size(); i < n; i++)
