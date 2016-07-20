@@ -32,6 +32,7 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.BitSet;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -372,6 +373,17 @@ public class JSONDeserializerTest {
         DummyObject6 expected = new DummyObject6();
         expected.setInt1(2796);
         assertEquals(expected, JSONDeserializer.deserialize(DummyObject6.class, json));
+    }
+
+    @Test
+    public void testBitset() {
+        JSONArray json = JSONArray.create().addValue(3).addValue(7).addValue(13).addValue(14);
+        BitSet expected = new BitSet();
+        expected.set(3);
+        expected.set(7);
+        expected.set(13);
+        expected.set(14);
+        assertEquals(expected, JSONDeserializer.deserialize(BitSet.class, json));
     }
 
     @Test

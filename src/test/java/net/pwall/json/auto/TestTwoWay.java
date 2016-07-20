@@ -27,6 +27,7 @@ package net.pwall.json.auto;
 
 import static org.junit.Assert.*;
 
+import java.util.BitSet;
 import java.util.Date;
 
 import org.junit.Test;
@@ -139,6 +140,18 @@ public class TestTwoWay {
     public void testDate() {
         Date a = new Date();
         Date b = JSONDeserializer.deserialize(Date.class, JSONSerializer.serialize(a));
+        assertEquals(a, b);
+    }
+
+    @Test
+    public void testBitSet() {
+        BitSet a = new BitSet();
+        a.set(2);
+        a.set(12);
+        a.set(27);
+        a.set(28);
+        a.set(29);
+        BitSet b = JSONDeserializer.deserialize(BitSet.class, JSONSerializer.serialize(a));
         assertEquals(a, b);
     }
 

@@ -33,6 +33,7 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.BitSet;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
@@ -146,32 +147,38 @@ public class JSONDeserializer {
 
         if (json instanceof JSONArray) {
 
+            JSONArray array = (JSONArray)json;
+
             // is the target an array?
 
             if (resultClass.isArray()) {
                 Class<?> itemClass = resultClass.getComponentType();
                 if (!itemClass.isPrimitive())
-                    return (T)deserializeArray(itemClass, (JSONArray)json);
-                return deserializePrimitiveArray(resultClass, (JSONArray)json);
+                    return (T)deserializeArray(itemClass, array);
+                return deserializePrimitiveArray(resultClass, array);
             }
 
             // is the target a Set?
 
             if (resultClass.equals(Set.class))
-                return (T)deserializeCollection((Class<?>)HashSet.class, typeArgs,
-                        (JSONArray)json);
+                return (T)deserializeCollection((Class<?>)HashSet.class, typeArgs, array);
 
             // is the target a List or Collection?
 
             if (resultClass.equals(List.class) || resultClass.equals(Collection.class))
-                return (T)deserializeCollection((Class<?>)ArrayList.class, typeArgs,
-                        (JSONArray)json);
+                return (T)deserializeCollection((Class<?>)ArrayList.class, typeArgs, array);
 
             // is the target any derived class from Collection?
 
             if (Collection.class.isAssignableFrom(resultClass))
-                return (T)deserializeCollection(resultClass, typeArgs,
-                        (JSONArray)json);
+                return (T)deserializeCollection(resultClass, typeArgs, array);
+
+            if (resultClass.equals(BitSet.class)) {
+                BitSet result = new BitSet();
+                for (int i = 0, n = array.size(); i < n; i++)
+                    result.set(array.getInt(i));
+                return (T)result;
+            }
 
             throw new JSONException("Can't deserialize array as " + resultClass);
 
