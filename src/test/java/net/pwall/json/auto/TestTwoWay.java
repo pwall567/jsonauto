@@ -131,8 +131,7 @@ public class TestTwoWay {
                 JSONSerializer.serialize(a));
         assertEquals(a, b);
         a = DummyEnum.GAMMA;
-        b = JSONDeserializer.deserialize(DummyEnum.class,
-                JSONSerializer.serialize(a));
+        b = JSONDeserializer.deserialize(DummyEnum.class, JSONSerializer.serialize(a));
         assertEquals(a, b);
     }
 
@@ -146,12 +145,17 @@ public class TestTwoWay {
     @Test
     public void testBitSet() {
         BitSet a = new BitSet();
+        BitSet b = JSONDeserializer.deserialize(BitSet.class, JSONSerializer.serialize(a));
+        assertEquals(a, b);
         a.set(2);
         a.set(12);
         a.set(27);
         a.set(28);
         a.set(29);
-        BitSet b = JSONDeserializer.deserialize(BitSet.class, JSONSerializer.serialize(a));
+        b = JSONDeserializer.deserialize(BitSet.class, JSONSerializer.serialize(a));
+        assertEquals(a, b);
+        a.set(30);
+        b = JSONDeserializer.deserialize(BitSet.class, JSONSerializer.serialize(a));
         assertEquals(a, b);
     }
 
