@@ -36,7 +36,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TimeZone;
 
 import net.pwall.json.JSONArray;
 import net.pwall.json.JSONBoolean;
@@ -361,7 +360,6 @@ public class JSONSerializer {
     public static JSONString serializeDate(Date date) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
-        calendar.set(Calendar.ZONE_OFFSET, TimeZone.getDefault().getOffset(date.getTime()));
         return serializeCalendar(calendar);
     }
 
@@ -386,7 +384,10 @@ public class JSONSerializer {
         append2Digits(sb, calendar.get(Calendar.SECOND));
         sb.append('.');
         append3Digits(sb, calendar.get(Calendar.MILLISECOND));
-        int offset = calendar.get(Calendar.ZONE_OFFSET) / (60 * 1000);
+        int offset = calendar.get(Calendar.ZONE_OFFSET);
+        if (calendar.getTimeZone().inDaylightTime(calendar.getTime()))
+            offset += calendar.get(Calendar.DST_OFFSET);
+        offset /= 60 * 1000;
         if (offset == 0)
             sb.append('Z');
         else {

@@ -441,7 +441,7 @@ public class JSONSerializerTest {
 
     @Test
     public void testCalendar() {
-        Calendar cal1 = Calendar.getInstance();
+        Calendar cal1 = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
         cal1.set(Calendar.YEAR, 2015);
         cal1.set(Calendar.MONTH, 11);
         cal1.set(Calendar.DAY_OF_MONTH, 2);

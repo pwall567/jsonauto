@@ -28,6 +28,7 @@ package net.pwall.json.auto;
 import static org.junit.Assert.*;
 
 import java.util.BitSet;
+import java.util.Calendar;
 import java.util.Date;
 
 import org.junit.Test;
@@ -136,11 +137,45 @@ public class TestTwoWay {
     }
 
     @Test
+    public void testCalendar() {
+        Calendar a = Calendar.getInstance();
+        Calendar b = JSONDeserializer.deserialize(Calendar.class, JSONSerializer.serialize(a));
+        assertEquals(a.getTime(), b.getTime());
+    }
+
+//    @Test
+//    public void testCalendar() {
+//        System.out.println("*** testCalendar() ***");
+//        Calendar a = Calendar.getInstance();
+//        System.out.println(a);
+//        System.out.println(a.getTime());
+//        JSONValue json = JSONSerializer.serialize(a);
+//        System.out.println(json);
+//        Calendar b = JSONDeserializer.deserialize(Calendar.class, json);
+//        b.getTime();
+//        System.out.println(b);
+//        System.out.println(b.getTime());
+//        assertEquals(a.getTime(), b.getTime());
+//    }
+
+    @Test
     public void testDate() {
         Date a = new Date();
         Date b = JSONDeserializer.deserialize(Date.class, JSONSerializer.serialize(a));
         assertEquals(a, b);
     }
+
+//    @Test
+//    public void testDate() {
+//        System.out.println("*** testDate() ***");
+//        Date a = new Date();
+//        System.out.println(a);
+//        JSONValue json = JSONSerializer.serialize(a);
+//        System.out.println(json);
+//        Date b = JSONDeserializer.deserialize(Date.class, json);
+//        System.out.println(b);
+//        assertEquals(a, b);
+//    }
 
     @Test
     public void testBitSet() {
