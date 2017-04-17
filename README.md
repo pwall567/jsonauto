@@ -15,7 +15,7 @@ To serialize any object:
 
 ```java
 JSONValue json = JSONSerializer.serialize(object);
-String text = jsontoJSON();
+String text = json.toJSON();
 ```
 
 Nested objects are handled automatically, as are many of the commonly-used classes from
