@@ -1,5 +1,5 @@
 /*
- * @(#) DummyObject.java
+ * @(#) DummyObject5.java
  *
  * jsonauto JSON Auto-serialization Library
  * Copyright (c) 2015, 2016 Peter Wall
@@ -27,35 +27,56 @@ package net.pwall.json.auto;
 
 import java.util.Objects;
 
+import net.pwall.json.JSONException;
+import net.pwall.json.JSONObject;
+import net.pwall.json.JSONValue;
+
 /**
  * Dummy object for testing JSON auto-serialization and deserialization.
  *
  * @author Peter Wall
  */
-public class DummyObject {
+public class DummyObject5 {
 
-    private String string1;
+    private int int1;
 
-    public String getString1() {
-        return string1;
+    public int getInt1() {
+        return int1;
     }
 
-    public void setString1(String string1) {
-        this.string1 = string1;
+    public void setInt1(int int1) {
+        this.int1 = int1;
+    }
+
+    @SuppressWarnings("unused")
+    private JSONObject toJSON() {
+        return JSONObject.create().putValue("dec", Integer.toString(int1)).
+                putValue("hex", Integer.toHexString(int1).toUpperCase());
+    }
+
+    @SuppressWarnings("unused")
+    private static DummyObject5 fromJSON(JSONValue json) {
+        JSONObject jsonObject = (JSONObject)Objects.requireNonNull(json);
+        int decValue = Integer.parseInt(jsonObject.getString("dec"));
+        if (decValue != Integer.parseInt(jsonObject.getString("hex"), 16))
+            throw new JSONException("Inconsistent values");
+        DummyObject5 result = new DummyObject5();
+        result.setInt1(decValue);
+        return result;
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (!(obj instanceof DummyObject))
+    public boolean equals(Object o) {
+        if (!(o instanceof DummyObject5))
             return false;
-        if (this == obj)
+        if (o == this)
             return true;
-        return Objects.equals(string1, ((DummyObject)obj).string1);
+        return int1 == ((DummyObject5)o).int1;
     }
 
     @Override
     public int hashCode() {
-        return string1 == null ? 0 : string1.hashCode();
+        return int1;
     }
 
 }

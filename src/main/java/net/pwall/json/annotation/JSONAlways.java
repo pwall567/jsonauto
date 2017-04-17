@@ -1,8 +1,8 @@
 /*
- * @(#) DummyEnum.java
+ * @(#) JSONAlways.java
  *
  * jsonauto JSON Auto-serialization Library
- * Copyright (c) 2015 Peter Wall
+ * Copyright (c) 2016 Peter Wall
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,15 +23,22 @@
  * SOFTWARE.
  */
 
-package net.pwall.json.auto;
+package net.pwall.json.annotation;
+
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Inherited;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
- * Dummy enum for testing auto-serialization.
- *
- * @author pwall
+ * Annotation to mark a field to be included in auto-serialization even when {@code null}.
  */
-public enum DummyEnum {
-
-    ALPHA, BETA, GAMMA
+@Documented
+@Inherited
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.FIELD)
+public @interface JSONAlways {
 
 }

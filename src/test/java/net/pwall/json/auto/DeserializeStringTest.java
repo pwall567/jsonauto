@@ -1,8 +1,8 @@
 /*
- * @(#) DummyEnum.java
+ * @(#) DeserializeStringTest.java
  *
  * jsonauto JSON Auto-serialization Library
- * Copyright (c) 2015 Peter Wall
+ * Copyright (c) 2016 Peter Wall
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,13 +25,31 @@
 
 package net.pwall.json.auto;
 
-/**
- * Dummy enum for testing auto-serialization.
- *
- * @author pwall
- */
-public enum DummyEnum {
+import static org.junit.Assert.*;
 
-    ALPHA, BETA, GAMMA
+import org.junit.Test;
+
+/**
+ * Test the {@link JSONDeserializer#deserializeString(Class, String)} function.
+ */
+public class DeserializeStringTest {
+
+    @Test
+    public void testString() {
+        String result = "abcdef";
+        assertEquals(result, JSONDeserializer.deserializeString(String.class, "abcdef"));
+        result = "";
+        assertEquals(result, JSONDeserializer.deserializeString(String.class, ""));
+    }
+
+    @Test
+    public void testInteger() {
+        Integer result = Integer.valueOf(27);
+        assertEquals(result, JSONDeserializer.deserializeString(Integer.class, "27"));
+        result = Integer.valueOf(0);
+        assertEquals(result, JSONDeserializer.deserializeString(Integer.class, "0"));
+        result = Integer.valueOf(-1);
+        assertEquals(result, JSONDeserializer.deserializeString(Integer.class, "-1"));
+    }
 
 }

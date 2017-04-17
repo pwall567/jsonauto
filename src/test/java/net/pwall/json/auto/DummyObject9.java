@@ -1,8 +1,8 @@
 /*
- * @(#) DummyEnum.java
+ * @(#) DummyObject9.java
  *
  * jsonauto JSON Auto-serialization Library
- * Copyright (c) 2015 Peter Wall
+ * Copyright (c) 2016 Peter Wall
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,13 +25,23 @@
 
 package net.pwall.json.auto;
 
-/**
- * Dummy enum for testing auto-serialization.
- *
- * @author pwall
- */
-public enum DummyEnum {
+import net.pwall.json.JSONValue;
 
-    ALPHA, BETA, GAMMA
+/**
+ * Dummy object for testing use of JSONValue in object.
+ *
+ * @author Peter Wall
+ */
+public class DummyObject9 {
+
+    private JSONValue json;
+
+    public JSONValue getJson() {
+        return json;
+    }
+
+    public void setJson(JSONValue json) {
+        this.json = json;
+    }
 
 }
