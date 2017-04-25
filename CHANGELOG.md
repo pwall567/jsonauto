@@ -3,6 +3,10 @@ Added this change log after project was already under way.  Early changes are no
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
+## [Unreleased]
+### Changed
+- switched to Java 8
+
 ## [1.0] - 2017-04-17
 ### Added
 - new class `JSONSerializer`
