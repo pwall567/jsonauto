@@ -66,6 +66,7 @@ public class JSONDeserializer {
      *
      * @param   resultClass     the class of the result object
      * @param   json            the JSON representation of the object
+     * @param   <T>             the type of the result
      * @return  the object
      * @throws  JSONException   if the JSON can not be deserialized to the required type
      * @throws  NullPointerException if the resultClass parameter is {@code null}
@@ -80,6 +81,7 @@ public class JSONDeserializer {
      * @param   resultClass     the class of the result object
      * @param   typeArgs        the actual types for a generic class, or {@code null}
      * @param   json            the JSON representation of the object
+     * @param   <T>             the type of the result
      * @return  the object
      * @throws  JSONException   if the JSON can not be deserialized to the required type
      * @throws  NullPointerException if the resultClass parameter is {@code null}
@@ -212,6 +214,7 @@ public class JSONDeserializer {
      *
      * @param   resultClass     the class of the result object
      * @param   s               the string
+     * @param   <T>             the type of the result
      * @return  the object
      * @throws  JSONException   if the string can not be deserialized to the required type
      * @throws  NullPointerException if the resultClass parameter is {@code null}
@@ -301,6 +304,7 @@ public class JSONDeserializer {
      *
      * @param   resultClass     the class of the result object
      * @param   number          the number
+     * @param   <T>             the type of the result
      * @return  the object
      * @throws  JSONException   if the number can not be deserialized to the required type
      * @throws  NullPointerException if the resultClass parameter is {@code null}
@@ -359,7 +363,8 @@ public class JSONDeserializer {
      * Deserialize an object.
      *
      * @param   resultClass     the class of the result object
-     * @param   json            the JSON representation of the object
+     * @param   object          the JSON representation of the object
+     * @param   <T>             the type of the result
      * @return  the object
      * @throws  NullPointerException if the resultClass parameter is {@code null}
      */
@@ -416,6 +421,8 @@ public class JSONDeserializer {
      * @param   mapClass        the class of the map
      * @param   typeArgs        the actual types for the generic class
      * @param   object          a {@link JSONObject} to be deserialized into a {@link Map}
+     * @param   <K>             the type of the key
+     * @param   <V>             the type of the value
      * @return  the {@link Map}
      * @throws  JSONException if the type arguments are incorrect, if the map class can't be
      *          instantiated, or if the deserialization of the items throws an exception
@@ -466,6 +473,7 @@ public class JSONDeserializer {
      * @param   collectionClass the class of the collection
      * @param   typeArgs        the actual types for the generic class
      * @param   array           a {@link JSONArray} to be deserialized into a {@link Collection}
+     * @param   <T>             the type of the result
      * @return  the {@link Collection}
      * @throws  JSONException if the type arguments are incorrect, if the collection class can't
      *          be instantiated, or if the deserialization of the items throws an exception
@@ -505,6 +513,7 @@ public class JSONDeserializer {
      *
      * @param   arrayClass      the class of the array
      * @param   array           a {@link JSONArray} to be deserialized into an array
+     * @param   <T>             the type of the result
      * @return  the result array
      * @throws  NullPointerException if either parameter is {@code null}
      */
@@ -562,6 +571,7 @@ public class JSONDeserializer {
      *
      * @param   itemClass       the class of the array item
      * @param   array           a {@link JSONArray} to be deserialized into an array
+     * @param   <T>             the type of the result array item
      * @return  the result array
      * @throws  NullPointerException if either parameter is {@code null}
      */
