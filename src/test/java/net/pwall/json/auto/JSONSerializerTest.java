@@ -25,6 +25,7 @@
 
 package net.pwall.json.auto;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.Calendar;
@@ -465,31 +466,15 @@ public class JSONSerializerTest {
         cal1.set(Calendar.SECOND, 34);
         cal1.set(Calendar.MILLISECOND, 123);
         Date date1 = cal1.getTime();
-        int offset = TimeZone.getDefault().getOffset(date1.getTime());
-        cal1.set(Calendar.ZONE_OFFSET, offset);
-        StringBuilder sb = new StringBuilder("2015-12-02T21:59:34.123");
-        offset /= 60 * 1000;
-        if (offset == 0)
-            sb.append('Z');
-        else {
-            if (offset < 0) {
-                sb.append('-');
-                offset = - offset;
-            }
-            else
-                sb.append('+');
-            append2Digits(sb, offset / 60);
-            sb.append(':');
-            append2Digits(sb, offset % 60);
-        }
-        JSONString jsonString = new JSONString(sb);
+        JSONString jsonString = new JSONString("2015-12-02T21:59:34.123+11:00");
         assertEquals(jsonString, JSONSerializer.serialize(date1));
     }
 
-    private static void append2Digits(StringBuilder sb, int n) {
-        if (n < 10)
-            sb.append('0');
-        sb.append(n);
+    @Test
+    public void testInstant() {
+        Instant instant = Instant.parse("2015-12-02T21:59:34.123Z");
+        JSONString jsonString = new JSONString("2015-12-02T21:59:34.123Z");
+        assertEquals(jsonString, JSONSerializer.serialize(instant));
     }
 
     @Test

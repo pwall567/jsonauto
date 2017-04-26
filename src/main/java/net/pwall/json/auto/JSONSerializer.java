@@ -25,10 +25,12 @@
 
 package net.pwall.json.auto;
 
+import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.time.Instant;
 import java.util.BitSet;
 import java.util.Calendar;
 import java.util.Collection;
@@ -36,6 +38,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TimeZone;
 
 import net.pwall.json.JSONArray;
 import net.pwall.json.JSONBoolean;
@@ -52,6 +55,7 @@ import net.pwall.json.JSONZero;
 import net.pwall.json.annotation.JSONAlways;
 import net.pwall.json.annotation.JSONIgnore;
 import net.pwall.json.annotation.JSONName;
+import net.pwall.util.Strings;
 
 /**
  * JSON auto-serialization class.
@@ -186,6 +190,11 @@ public class JSONSerializer {
 
         if (object instanceof Date)
             return serializeDate((Date)object);
+
+        // is it an Instant?
+
+        if (object instanceof Instant)
+            return serializeInstant((Instant)object);
 
         // is it a BitSet?
 
@@ -371,48 +380,55 @@ public class JSONSerializer {
      */
     public static JSONString serializeCalendar(Calendar calendar) {
         StringBuilder sb = new StringBuilder();
-        sb.append(calendar.get(Calendar.YEAR));
-        sb.append('-');
-        append2Digits(sb, calendar.get(Calendar.MONTH) + 1);
-        sb.append('-');
-        append2Digits(sb, calendar.get(Calendar.DAY_OF_MONTH));
-        sb.append('T');
-        append2Digits(sb, calendar.get(Calendar.HOUR_OF_DAY));
-        sb.append(':');
-        append2Digits(sb, calendar.get(Calendar.MINUTE));
-        sb.append(':');
-        append2Digits(sb, calendar.get(Calendar.SECOND));
-        sb.append('.');
-        append3Digits(sb, calendar.get(Calendar.MILLISECOND));
-        int offset = calendar.get(Calendar.ZONE_OFFSET);
-        if (calendar.getTimeZone().inDaylightTime(calendar.getTime()))
-            offset += calendar.get(Calendar.DST_OFFSET);
-        offset /= 60 * 1000;
-        if (offset == 0)
-            sb.append('Z');
-        else {
-            if (offset < 0) {
-                sb.append('-');
-                offset = -offset;
-            }
-            else
-                sb.append('+');
-            append2Digits(sb, offset / 60);
+        try {
+            Strings.appendPositiveInt(sb, calendar.get(Calendar.YEAR));
+            sb.append('-');
+            Strings.append2Digits(sb, calendar.get(Calendar.MONTH) + 1);
+            sb.append('-');
+            Strings.append2Digits(sb, calendar.get(Calendar.DAY_OF_MONTH));
+            sb.append('T');
+            Strings.append2Digits(sb, calendar.get(Calendar.HOUR_OF_DAY));
             sb.append(':');
-            append2Digits(sb, offset % 60);
+            Strings.append2Digits(sb, calendar.get(Calendar.MINUTE));
+            sb.append(':');
+            Strings.append2Digits(sb, calendar.get(Calendar.SECOND));
+            sb.append('.');
+            Strings.append3Digits(sb, calendar.get(Calendar.MILLISECOND));
+            int offset = calendar.get(Calendar.ZONE_OFFSET);
+            if (calendar.getTimeZone().inDaylightTime(calendar.getTime()))
+                offset += calendar.get(Calendar.DST_OFFSET);
+            offset /= 60 * 1000;
+            if (offset == 0)
+                sb.append('Z');
+            else {
+                if (offset < 0) {
+                    sb.append('-');
+                    offset = -offset;
+                }
+                else
+                    sb.append('+');
+                Strings.append2Digits(sb, offset / 60);
+                sb.append(':');
+                Strings.append2Digits(sb, offset % 60);
+            }
+        }
+        catch (IOException ioe) {
+            // can't happen - StringBuilder does not throw IOException
         }
         return new JSONString(sb);
     }
 
-    private static void append2Digits(StringBuilder sb, int n) {
-        sb.append((char)((n / 10) + '0'));
-        sb.append((char)((n % 10) + '0'));
-    }
-
-    private static void append3Digits(StringBuilder sb, int n) {
-        sb.append((char)((n / 100) + '0'));
-        sb.append((char)(((n / 10) % 10) + '0'));
-        sb.append((char)((n % 10) + '0'));
+    /**
+     * Serialize an {@link Instant}.
+     *
+     * @param   instant the {@link Instant}
+     * @return  the JSON for that {@link Instant}
+     */
+    public static JSONString serializeInstant(Instant instant) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(new Date(instant.toEpochMilli()));
+        calendar.setTimeZone(TimeZone.getTimeZone("GMT"));
+        return serializeCalendar(calendar);
     }
 
     /**
