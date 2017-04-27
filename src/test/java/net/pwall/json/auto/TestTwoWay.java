@@ -27,6 +27,7 @@ package net.pwall.json.auto;
 
 import static org.junit.Assert.*;
 
+import java.time.Instant;
 import java.util.BitSet;
 import java.util.Calendar;
 import java.util.Date;
@@ -176,6 +177,13 @@ public class TestTwoWay {
 //        System.out.println(b);
 //        assertEquals(a, b);
 //    }
+
+    @Test
+    public void testInstant() {
+        Instant a = Instant.now();
+        Instant b = JSONDeserializer.deserialize(Instant.class, JSONSerializer.serialize(a));
+        assertEquals(a, b);
+    }
 
     @Test
     public void testBitSet() {
