@@ -30,6 +30,7 @@ import static org.junit.Assert.*;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
@@ -405,6 +406,17 @@ public class JSONDeserializerTest {
         cal.set(Calendar.ZONE_OFFSET, 10 * 60 * 60 * 1000);
         Date expected = cal.getTime();
         assertEquals(expected, JSONDeserializer.deserialize(Date.class, json));
+    }
+
+    @Test
+    public void testInstant() {
+        JSONString json = new JSONString("2016-07-18T20:01:23.456Z");
+        Calendar cal = Calendar.getInstance();
+        cal.set(2016, 6, 18, 20, 1, 23);
+        cal.set(Calendar.MILLISECOND, 456);
+        cal.set(Calendar.ZONE_OFFSET, 0);
+        Instant expected = Instant.ofEpochMilli(cal.getTimeInMillis());
+        assertEquals(expected, JSONDeserializer.deserialize(Instant.class, json));
     }
 
     private static final int[] calendarFields = { Calendar.YEAR, Calendar.MONTH,

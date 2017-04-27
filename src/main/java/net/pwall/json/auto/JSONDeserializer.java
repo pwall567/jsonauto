@@ -32,6 +32,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.Calendar;
@@ -273,6 +274,17 @@ public class JSONDeserializer {
             }
             catch (Exception e) {
                 throw new JSONException("Can't deserialize Date", e);
+            }
+        }
+
+        // is the target class Instant?
+
+        if (resultClass.equals(Instant.class)) {
+            try {
+                return (T)Instant.ofEpochMilli(ISO8601Date.decode(s).getTimeInMillis());
+            }
+            catch (Exception e) {
+                throw new JSONException("Can't deserialize Instant", e);
             }
         }
 
