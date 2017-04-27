@@ -31,6 +31,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.BitSet;
 import java.util.Calendar;
 import java.util.Collection;
@@ -195,6 +196,11 @@ public class JSONSerializer {
 
         if (object instanceof Instant)
             return serializeInstant((Instant)object);
+
+        // is it a LocalDate?
+
+        if (object instanceof LocalDate)
+            return serializeLocalDate((LocalDate)object);
 
         // is it a BitSet?
 
@@ -425,10 +431,17 @@ public class JSONSerializer {
      * @return  the JSON for that {@link Instant}
      */
     public static JSONString serializeInstant(Instant instant) {
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(new Date(instant.toEpochMilli()));
-        calendar.setTimeZone(TimeZone.getTimeZone("GMT"));
-        return serializeCalendar(calendar);
+        return new JSONString(instant.toString());
+    }
+
+    /**
+     * Serialize a {@link LocalDate}.
+     *
+     * @param   localDate   the {@link LocalDate}
+     * @return  the JSON for that {@link LocalDate}
+     */
+    public static JSONString serializeLocalDate(LocalDate localDate) {
+        return new JSONString(localDate.toString());
     }
 
     /**

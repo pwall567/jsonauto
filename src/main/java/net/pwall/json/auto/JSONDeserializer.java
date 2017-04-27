@@ -33,6 +33,7 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.Calendar;
@@ -281,10 +282,21 @@ public class JSONDeserializer {
 
         if (resultClass.equals(Instant.class)) {
             try {
-                return (T)Instant.ofEpochMilli(ISO8601Date.decode(s).getTimeInMillis());
+                return (T)Instant.parse(s);
             }
             catch (Exception e) {
                 throw new JSONException("Can't deserialize Instant", e);
+            }
+        }
+
+        // is the target class LocalDate?
+
+        if (resultClass.equals(LocalDate.class)) {
+            try {
+                return (T)LocalDate.parse(s);
+            }
+            catch (Exception e) {
+                throw new JSONException("Can't deserialize LocalDate", e);
             }
         }
 
