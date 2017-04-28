@@ -32,6 +32,7 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
@@ -425,6 +426,13 @@ public class JSONDeserializerTest {
         JSONString json = new JSONString("2017-04-27");
         LocalDate expected = LocalDate.of(2017, 4, 27);
         assertEquals(expected, JSONDeserializer.deserialize(LocalDate.class, json));
+    }
+
+    @Test
+    public void testLocalDateTime() {
+        JSONString json = new JSONString("2017-04-27T13:05:12");
+        LocalDateTime expected = LocalDateTime.of(2017, 4, 27, 13, 5, 12);
+        assertEquals(expected, JSONDeserializer.deserialize(LocalDateTime.class, json));
     }
 
     private static final int[] calendarFields = { Calendar.YEAR, Calendar.MONTH,

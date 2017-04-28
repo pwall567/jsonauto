@@ -32,6 +32,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.BitSet;
 import java.util.Calendar;
 import java.util.Collection;
@@ -39,7 +40,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TimeZone;
 
 import net.pwall.json.JSONArray;
 import net.pwall.json.JSONBoolean;
@@ -201,6 +201,11 @@ public class JSONSerializer {
 
         if (object instanceof LocalDate)
             return serializeLocalDate((LocalDate)object);
+
+        // is it a LocalDateTime?
+
+        if (object instanceof LocalDateTime)
+            return serializeLocalDateTime((LocalDateTime)object);
 
         // is it a BitSet?
 
@@ -432,6 +437,16 @@ public class JSONSerializer {
      */
     public static JSONString serializeInstant(Instant instant) {
         return new JSONString(instant.toString());
+    }
+
+    /**
+     * Serialize a {@link LocalDateTime}.
+     *
+     * @param   localDateTime   the {@link LocalDateTime}
+     * @return  the JSON for that {@link LocalDateTime}
+     */
+    public static JSONString serializeLocalDateTime(LocalDateTime localDateTime) {
+        return new JSONString(localDateTime.toString());
     }
 
     /**

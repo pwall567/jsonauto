@@ -27,6 +27,7 @@ package net.pwall.json.auto;
 
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.Calendar;
@@ -483,6 +484,16 @@ public class JSONSerializerTest {
         LocalDate localDate = LocalDate.of(2017, 4, 27);
         JSONString jsonString = new JSONString("2017-04-27");
         assertEquals(jsonString, JSONSerializer.serialize(localDate));
+    }
+
+    @Test
+    public void testLocalDateTime() {
+        LocalDateTime localDateTime = LocalDateTime.of(2017, 4, 28, 13, 5, 12);
+        JSONString jsonString = new JSONString("2017-04-28T13:05:12");
+        assertEquals(jsonString, JSONSerializer.serialize(localDateTime));
+        localDateTime = LocalDateTime.of(2017, 4, 28, 13, 5, 12, 123_000_000);
+        jsonString = new JSONString("2017-04-28T13:05:12.123");
+        assertEquals(jsonString, JSONSerializer.serialize(localDateTime));
     }
 
     @Test

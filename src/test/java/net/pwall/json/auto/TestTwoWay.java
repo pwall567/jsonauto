@@ -29,6 +29,7 @@ import static org.junit.Assert.*;
 
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.BitSet;
 import java.util.Calendar;
 import java.util.Date;
@@ -191,6 +192,14 @@ public class TestTwoWay {
         LocalDate a = LocalDate.now();
         LocalDate b =
                 JSONDeserializer.deserialize(LocalDate.class, JSONSerializer.serialize(a));
+        assertEquals(a, b);
+    }
+
+    @Test
+    public void testLocalDateTime() {
+        LocalDateTime a = LocalDateTime.now();
+        LocalDateTime b =
+                JSONDeserializer.deserialize(LocalDateTime.class, JSONSerializer.serialize(a));
         assertEquals(a, b);
     }
 

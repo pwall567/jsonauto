@@ -34,6 +34,7 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.Calendar;
@@ -297,6 +298,17 @@ public class JSONDeserializer {
             }
             catch (Exception e) {
                 throw new JSONException("Can't deserialize LocalDate", e);
+            }
+        }
+
+        // is the target class LocalDateTime?
+
+        if (resultClass.equals(LocalDateTime.class)) {
+            try {
+                return (T)LocalDateTime.parse(s);
+            }
+            catch (Exception e) {
+                throw new JSONException("Can't deserialize LocalDateTime", e);
             }
         }
 
