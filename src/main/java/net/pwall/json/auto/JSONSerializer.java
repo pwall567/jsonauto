@@ -2,7 +2,7 @@
  * @(#) JSONSerializer.java
  *
  * jsonauto JSON Auto-serialization Library
- * Copyright (c) 2015, 2016 Peter Wall
+ * Copyright (c) 2015, 2016, 2017 Peter Wall
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -33,12 +33,18 @@ import java.lang.reflect.Modifier;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.OffsetTime;
+import java.time.Year;
+import java.time.YearMonth;
+import java.time.ZonedDateTime;
 import java.util.BitSet;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import net.pwall.json.JSONArray;
@@ -207,10 +213,40 @@ public class JSONSerializer {
         if (object instanceof LocalDateTime)
             return serializeLocalDateTime((LocalDateTime)object);
 
+        // is it an OffsetTime?
+
+        if (object instanceof OffsetTime)
+            return serializeOffsetTime((OffsetTime)object);
+
+        // is it an OffsetDateTime?
+
+        if (object instanceof OffsetDateTime)
+            return serializeOffsetDateTime((OffsetDateTime)object);
+
+        // is it a ZonedDateTime?
+
+        if (object instanceof ZonedDateTime)
+            return serializeZonedDateTime((ZonedDateTime)object);
+
+        // is it a Year?
+
+        if (object instanceof Year)
+            return serializeYear((Year)object);
+
+        // is it a YearMonth?
+
+        if (object instanceof YearMonth)
+            return serializeYearMonth((YearMonth)object);
+
         // is it a BitSet?
 
         if (object instanceof BitSet)
             return serializeBitSet((BitSet)object);
+
+        // is it an Optional?
+
+        if (object instanceof Optional)
+            return serializeOptional((Optional<?>)object);
 
         // TODO - add UUID, java.time classes, ...
 
@@ -440,6 +476,16 @@ public class JSONSerializer {
     }
 
     /**
+     * Serialize a {@link LocalDate}.
+     *
+     * @param   localDate   the {@link LocalDate}
+     * @return  the JSON for that {@link LocalDate}
+     */
+    public static JSONString serializeLocalDate(LocalDate localDate) {
+        return new JSONString(localDate.toString());
+    }
+
+    /**
      * Serialize a {@link LocalDateTime}.
      *
      * @param   localDateTime   the {@link LocalDateTime}
@@ -450,13 +496,53 @@ public class JSONSerializer {
     }
 
     /**
-     * Serialize a {@link LocalDate}.
+     * Serialize an {@link OffsetTime}.
      *
-     * @param   localDate   the {@link LocalDate}
-     * @return  the JSON for that {@link LocalDate}
+     * @param   offsetTime  the {@link OffsetTime}
+     * @return  the JSON for that {@link OffsetTime}
      */
-    public static JSONString serializeLocalDate(LocalDate localDate) {
-        return new JSONString(localDate.toString());
+    public static JSONString serializeOffsetTime(OffsetTime offsetTime) {
+        return new JSONString(offsetTime.toString());
+    }
+
+    /**
+     * Serialize an {@link OffsetDateTime}.
+     *
+     * @param   offsetDateTime  the {@link OffsetDateTime}
+     * @return  the JSON for that {@link OffsetDateTime}
+     */
+    public static JSONString serializeOffsetDateTime(OffsetDateTime offsetDateTime) {
+        return new JSONString(offsetDateTime.toString());
+    }
+
+    /**
+     * Serialize a {@link ZonedDateTime}.
+     *
+     * @param   zonedDateTime   the {@link ZonedDateTime}
+     * @return  the JSON for that {@link ZonedDateTime}
+     */
+    public static JSONString serializeZonedDateTime(ZonedDateTime zonedDateTime) {
+        return new JSONString(zonedDateTime.toString());
+    }
+
+    /**
+     * Serialize a {@link Year}.
+     *
+     * @param   year    the {@link Year}
+     * @return  the JSON for that {@link Year}
+     */
+    public static JSONString serializeYear(Year year) {
+        return new JSONString(year.toString());
+    }
+
+    /**
+     * Serialize a {@link YearMonth}.
+     *
+     * @param   yearMonth   the {@link YearMonth}
+     * @return  the JSON for that {@link YearMonth}
+     */
+    public static JSONString serializeYearMonth(YearMonth yearMonth) {
+        return new JSONString(yearMonth.toString());
     }
 
     /**
@@ -471,6 +557,16 @@ public class JSONSerializer {
             if (bitSet.get(i))
                 array.addValue(i);
         return array;
+    }
+
+    /**
+     * Serialize an {@link Optional}.
+     *
+     * @param   bitSet  the {@link BitSet}
+     * @return  the JSON for that {@link BitSet}
+     */
+    public static JSONValue serializeOptional(Optional<?> optional) {
+        return optional.isPresent() ? serialize(optional.get()) : null;
     }
 
     /**
@@ -532,8 +628,19 @@ public class JSONSerializer {
                 try {
                     field.setAccessible(true);
                     Object value = field.get(object);
-                    if (value != null || fieldAnnotated(field, JSONAlways.class))
-                        jsonObject.put(fieldName, serialize(value));
+                    if (value != null) {
+                        if (value instanceof Optional) {
+                            Optional<?> optional = (Optional<?>)value;
+                            if (optional.isPresent())
+                                jsonObject.put(fieldName, serialize(optional.get()));
+                            else if (fieldAnnotated(field, JSONAlways.class))
+                                jsonObject.put(fieldName, null);
+                        }
+                        else
+                            jsonObject.put(fieldName, serialize(value));
+                    }
+                    else if (fieldAnnotated(field, JSONAlways.class))
+                        jsonObject.put(fieldName, null);
                 }
                 catch (JSONException e) {
                     throw e;

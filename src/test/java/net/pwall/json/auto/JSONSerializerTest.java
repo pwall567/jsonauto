@@ -2,7 +2,7 @@
  * @(#) JSONSerializerTest.java
  *
  * jsonauto JSON Auto-serialization Library
- * Copyright (c) 2015, 2016 Peter Wall
+ * Copyright (c) 2015, 2016, 2017 Peter Wall
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -28,6 +28,13 @@ package net.pwall.json.auto;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.OffsetTime;
+import java.time.Year;
+import java.time.YearMonth;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.Calendar;
@@ -36,6 +43,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TimeZone;
 
@@ -497,12 +505,87 @@ public class JSONSerializerTest {
     }
 
     @Test
+    public void testOffsetTime() {
+        OffsetTime offsetTime = OffsetTime.of(13, 5, 12, 123000000, ZoneOffset.ofHours(10));
+        JSONString jsonString = new JSONString("13:05:12.123+10:00");
+        assertEquals(jsonString, JSONSerializer.serialize(offsetTime));
+    }
+
+    @Test
+    public void testOffsetDateTime() {
+        OffsetDateTime offsetDateTime =
+                OffsetDateTime.of(2017, 4, 29, 13, 5, 12, 123000000, ZoneOffset.ofHours(10));
+        JSONString jsonString = new JSONString("2017-04-29T13:05:12.123+10:00");
+        assertEquals(jsonString, JSONSerializer.serialize(offsetDateTime));
+    }
+
+    @Test
+    public void testZonedDateTime() {
+        ZonedDateTime zonedDateTime = ZonedDateTime.of(2017, 4, 29, 13, 5, 12, 123000000,
+                ZoneId.of("Australia/Sydney"));
+        JSONString jsonString =
+                new JSONString("2017-04-29T13:05:12.123+10:00[Australia/Sydney]");
+        assertEquals(jsonString, JSONSerializer.serialize(zonedDateTime));
+    }
+
+    @Test
+    public void testYear() {
+        Year year = Year.of(2017);
+        JSONString jsonString = new JSONString("2017");
+        assertEquals(jsonString, JSONSerializer.serialize(year));
+        year = Year.of(1917);
+        jsonString = new JSONString("1917");
+        assertEquals(jsonString, JSONSerializer.serialize(year));
+    }
+
+    @Test
+    public void testYearMonth() {
+        YearMonth yearMonth = YearMonth.of(2017, 4);
+        JSONString jsonString = new JSONString("2017-04");
+        assertEquals(jsonString, JSONSerializer.serialize(yearMonth));
+        yearMonth = YearMonth.of(1917, 12);
+        jsonString = new JSONString("1917-12");
+        assertEquals(jsonString, JSONSerializer.serialize(yearMonth));
+    }
+
+    @Test
     public void testBitset() {
         BitSet bitset = new BitSet(4);
         bitset.set(1);
         bitset.set(3);
         JSONArray jsonArray = JSONArray.create().addValue(1).addValue(3);
         assertEquals(jsonArray, JSONSerializer.serialize(bitset));
+    }
+
+    @Test
+    public void testOptional() {
+        DummyObject object1 = new DummyObject();
+        object1.setString1("value1");
+        Optional<DummyObject> optional = Optional.of(object1);
+        JSONObject jsonObject = JSONObject.create().putValue("string1", "value1");
+        assertEquals(jsonObject, JSONSerializer.serialize(optional));
+    }
+
+    @Test
+    public void testOptional2() {
+        DummyObject10 object10 = new DummyObject10();
+        object10.setValue1("abcd");
+        JSONObject jsonObject = JSONObject.create().putValue("value1", "abcd");
+        assertEquals(jsonObject, JSONSerializer.serialize(object10));
+        object10.setValue1Empty();
+        jsonObject = JSONObject.create();
+        assertEquals(jsonObject, JSONSerializer.serialize(object10));
+    }
+
+    @Test
+    public void testOptional3() {
+        DummyObject11 object11 = new DummyObject11();
+        object11.setValue1("abcd");
+        JSONObject jsonObject = JSONObject.create().putValue("value1", "abcd");
+        assertEquals(jsonObject, JSONSerializer.serialize(object11));
+        object11.setValue1Empty();
+        jsonObject = JSONObject.create().putNull("value1");
+        assertEquals(jsonObject, JSONSerializer.serialize(object11));
     }
 
     @Test

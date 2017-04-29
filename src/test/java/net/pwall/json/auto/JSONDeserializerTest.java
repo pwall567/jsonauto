@@ -33,6 +33,13 @@ import java.lang.reflect.Type;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.OffsetTime;
+import java.time.Year;
+import java.time.YearMonth;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
@@ -218,6 +225,15 @@ public class JSONDeserializerTest {
         Map<String, String> expected = new HashMap<>();
         expected.put("key1", "abcdef");
         Type[] types = new Type[] { String.class, String.class };
+        assertEquals(expected, JSONDeserializer.deserialize(HashMap.class, types, json));
+    }
+
+    @Test
+    public void testMapStringInt() {
+        JSONObject json = JSONObject.create().putValue("key1", 1234);
+        Map<String, Integer> expected = new HashMap<>();
+        expected.put("key1", 1234);
+        Type[] types = new Type[] { String.class, Integer.class };
         assertEquals(expected, JSONDeserializer.deserialize(HashMap.class, types, json));
     }
 
@@ -435,6 +451,43 @@ public class JSONDeserializerTest {
         assertEquals(expected, JSONDeserializer.deserialize(LocalDateTime.class, json));
     }
 
+    @Test
+    public void testOffsetTime() {
+        JSONString json = new JSONString("13:05:12.123+10:00");
+        OffsetTime expected = OffsetTime.of(13, 5, 12, 123000000, ZoneOffset.ofHours(10));
+        assertEquals(expected, JSONDeserializer.deserialize(OffsetTime.class, json));
+    }
+
+    @Test
+    public void testOffsetDateTime() {
+        JSONString json = new JSONString("2017-04-29T13:05:12.123+10:00");
+        OffsetDateTime expected =
+                OffsetDateTime.of(2017, 4, 29, 13, 5, 12, 123000000, ZoneOffset.ofHours(10));
+        assertEquals(expected, JSONDeserializer.deserialize(OffsetDateTime.class, json));
+    }
+
+    @Test
+    public void testZonedDateTime() {
+        JSONString json = new JSONString("2017-04-29T13:05:12.123+10:00[Australia/Sydney]");
+        ZonedDateTime expected = ZonedDateTime.of(2017, 4, 29, 13, 5, 12, 123000000,
+                ZoneId.of("Australia/Sydney"));
+        assertEquals(expected, JSONDeserializer.deserialize(ZonedDateTime.class, json));
+    }
+
+    @Test
+    public void testYear() {
+        JSONString json = new JSONString("2017");
+        Year expected = Year.of(2017);
+        assertEquals(expected, JSONDeserializer.deserialize(Year.class, json));
+    }
+
+    @Test
+    public void testYearMonth() {
+        JSONString json = new JSONString("2017-04");
+        YearMonth expected = YearMonth.of(2017, 4);
+        assertEquals(expected, JSONDeserializer.deserialize(YearMonth.class, json));
+    }
+
     private static final int[] calendarFields = { Calendar.YEAR, Calendar.MONTH,
         Calendar.DAY_OF_MONTH, Calendar.HOUR_OF_DAY, Calendar.MINUTE, Calendar.SECOND,
         Calendar.MILLISECOND, Calendar.ZONE_OFFSET };
@@ -445,6 +498,14 @@ public class JSONDeserializerTest {
                 return false;
         }
         return a.getTime().equals(b.getTime());
+    }
+
+    @Test
+    public void testOptional() {
+        JSONObject json = JSONObject.create().putValue("value1", "xyz");
+        DummyObject10 expected = new DummyObject10();
+        expected.setValue1("xyz");
+        assertEquals(expected, JSONDeserializer.deserialize(DummyObject10.class, json));
     }
 
 }

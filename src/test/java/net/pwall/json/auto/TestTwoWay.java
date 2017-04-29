@@ -30,6 +30,11 @@ import static org.junit.Assert.*;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.OffsetTime;
+import java.time.Year;
+import java.time.YearMonth;
+import java.time.ZonedDateTime;
 import java.util.BitSet;
 import java.util.Calendar;
 import java.util.Date;
@@ -204,6 +209,45 @@ public class TestTwoWay {
     }
 
     @Test
+    public void testOffsetTime() {
+        OffsetTime a = OffsetTime.now();
+        OffsetTime b =
+                JSONDeserializer.deserialize(OffsetTime.class, JSONSerializer.serialize(a));
+        assertEquals(a, b);
+    }
+
+    @Test
+    public void testOffsetDateTime() {
+        OffsetDateTime a = OffsetDateTime.now();
+        OffsetDateTime b =
+                JSONDeserializer.deserialize(OffsetDateTime.class, JSONSerializer.serialize(a));
+        assertEquals(a, b);
+    }
+
+    @Test
+    public void testZonedDateTime() {
+        ZonedDateTime a = ZonedDateTime.now();
+        ZonedDateTime b =
+                JSONDeserializer.deserialize(ZonedDateTime.class, JSONSerializer.serialize(a));
+        assertEquals(a, b);
+    }
+
+    @Test
+    public void testYear() {
+        Year a = Year.now();
+        Year b = JSONDeserializer.deserialize(Year.class, JSONSerializer.serialize(a));
+        assertEquals(a, b);
+    }
+
+    @Test
+    public void testYearMonth() {
+        YearMonth a = YearMonth.now();
+        YearMonth b =
+                JSONDeserializer.deserialize(YearMonth.class, JSONSerializer.serialize(a));
+        assertEquals(a, b);
+    }
+
+    @Test
     public void testBitSet() {
         BitSet a = new BitSet();
         BitSet b = JSONDeserializer.deserialize(BitSet.class, JSONSerializer.serialize(a));
@@ -217,6 +261,18 @@ public class TestTwoWay {
         assertEquals(a, b);
         a.set(30);
         b = JSONDeserializer.deserialize(BitSet.class, JSONSerializer.serialize(a));
+        assertEquals(a, b);
+    }
+
+    @Test
+    public void testOptional() {
+        DummyObject10 a = new DummyObject10();
+        a.setValue1("pqrs");
+        DummyObject10 b =
+                JSONDeserializer.deserialize(DummyObject10.class, JSONSerializer.serialize(a));
+        assertEquals(a, b);
+        a.setValue1Empty();
+        b = JSONDeserializer.deserialize(DummyObject10.class, JSONSerializer.serialize(a));
         assertEquals(a, b);
     }
 

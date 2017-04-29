@@ -35,6 +35,11 @@ import java.lang.reflect.Type;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.OffsetTime;
+import java.time.Year;
+import java.time.YearMonth;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.Calendar;
@@ -45,6 +50,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 
 import net.pwall.json.JSONArray;
@@ -124,6 +130,11 @@ public class JSONDeserializer {
         catch (Exception e) {
             throw new JSONException("Custom deserialization failed for " + resultClass, e);
         }
+
+        // is the target an Optional?
+
+        if (resultClass.equals(Optional.class))
+            return (T)deserializeOptional(typeArgs, json);
 
         // is the JSON a string?
 
@@ -312,6 +323,61 @@ public class JSONDeserializer {
             }
         }
 
+        // is the target class OffsetTime?
+
+        if (resultClass.equals(OffsetTime.class)) {
+            try {
+                return (T)OffsetTime.parse(s);
+            }
+            catch (Exception e) {
+                throw new JSONException("Can't deserialize OffsetTime", e);
+            }
+        }
+
+        // is the target class OffsetDateTime?
+
+        if (resultClass.equals(OffsetDateTime.class)) {
+            try {
+                return (T)OffsetDateTime.parse(s);
+            }
+            catch (Exception e) {
+                throw new JSONException("Can't deserialize OffsetDateTime", e);
+            }
+        }
+
+        // is the target class ZonedDateTime?
+
+        if (resultClass.equals(ZonedDateTime.class)) {
+            try {
+                return (T)ZonedDateTime.parse(s);
+            }
+            catch (Exception e) {
+                throw new JSONException("Can't deserialize ZonedDateTime", e);
+            }
+        }
+
+        // is the target class Year?
+
+        if (resultClass.equals(Year.class)) {
+            try {
+                return (T)Year.parse(s);
+            }
+            catch (Exception e) {
+                throw new JSONException("Can't deserialize Year", e);
+            }
+        }
+
+        // is the target class YearMonth?
+
+        if (resultClass.equals(YearMonth.class)) {
+            try {
+                return (T)YearMonth.parse(s);
+            }
+            catch (Exception e) {
+                throw new JSONException("Can't deserialize Year", e);
+            }
+        }
+
         // is the target class an enum?
 
         if (Enum.class.isAssignableFrom(resultClass)) {
@@ -469,24 +535,10 @@ public class JSONDeserializer {
             JSONObject object) {
         if (typeArgs == null || typeArgs.length != 2)
             throw new JSONException("Missing or incorrect type arguments for Map");
-        Class<K> keyClass = null;
-        Type type = typeArgs[0];
-        if (type instanceof Class)
-            keyClass = (Class<K>)type;
-        else if (type instanceof ParameterizedType) {
-            ParameterizedType pt = (ParameterizedType)type;
-            keyClass = (Class<K>)pt.getRawType();
-        }
-        Class<V> valueClass = null;
-        Type[] valueTypeArgs = null;
-        type = typeArgs[0];
-        if (type instanceof Class)
-            valueClass = (Class<V>)type;
-        else if (type instanceof ParameterizedType) {
-            ParameterizedType pt = (ParameterizedType)type;
-            valueClass = (Class<V>)pt.getRawType();
-            valueTypeArgs = pt.getActualTypeArguments();
-        }
+        Class<K> keyClass = (Class<K>)getGenericClass(typeArgs[0]);
+        Type valueType = typeArgs[1];
+        Class<V> valueClass = (Class<V>)getGenericClass(valueType);
+        Type[] valueTypeArgs = getGenericTypeArgs(valueType);
         try {
             Map<K, V> result = (Map<K, V>)mapClass.newInstance();
             for (Map.Entry<String, JSONValue> entry : object.entrySet())
@@ -520,16 +572,9 @@ public class JSONDeserializer {
             Type[] typeArgs, JSONArray array) {
         if (typeArgs == null || typeArgs.length != 1)
             throw new JSONException("Missing or incorrect type arguments for Collection");
-        Class<T> itemClass = null;
-        Type[] itemTypeArgs = null;
-        Type type = typeArgs[0];
-        if (type instanceof Class)
-            itemClass = (Class<T>)type;
-        else if (type instanceof ParameterizedType) {
-            ParameterizedType pt = (ParameterizedType)type;
-            itemClass = (Class<T>)pt.getRawType();
-            itemTypeArgs = pt.getActualTypeArguments();
-        }
+        Type itemType = typeArgs[0];
+        Class<T> itemClass = (Class<T>)getGenericClass(itemType);
+        Type[] itemTypeArgs = getGenericTypeArgs(itemType);
         try {
             Collection<T> result = (Collection<T>)collectionClass.newInstance();
             for (JSONValue value : array)
@@ -618,6 +663,45 @@ public class JSONDeserializer {
         for (int i = 0; i < n; i++)
             result[i] = deserialize(itemClass, array.get(i));
         return result;
+    }
+
+    /**
+     * Deserialize an {@link Optional}.
+     *
+     * @param   typeArgs    the actual types for the generic class
+     * @param   json        the JSON for the target object
+     * @return  the result {@link Optional}
+     * @throws  JSONException if the type arguments are incorrect or if the deserialization of
+     *          the target object throws an exception
+     */
+    public static Optional<?> deserializeOptional(Type[] typeArgs, JSONValue json) {
+        if (typeArgs == null || typeArgs.length != 1)
+            throw new JSONException("Missing or incorrect type arguments for Optional");
+        Type targetType = typeArgs[0];
+        Class<?> targetClass = getGenericClass(targetType);
+        Type[] targetTypeArgs = getGenericTypeArgs(targetType);
+        Object value = deserialize(targetClass, targetTypeArgs, json);
+        return value != null ? Optional.of(value) : Optional.empty();
+    }
+
+    private static Class<?> getGenericClass(Type type) {
+        if (type instanceof Class)
+            return (Class<?>)type;
+        if (type instanceof ParameterizedType) {
+            ParameterizedType pt = (ParameterizedType)type;
+            return (Class<?>)pt.getRawType();
+        }
+        throw new JSONException("Can't determine target class for parameterized type");
+    }
+
+    private static Type[] getGenericTypeArgs(Type type) {
+        if (type instanceof Class)
+            return null;
+        if (type instanceof ParameterizedType) {
+            ParameterizedType pt = (ParameterizedType)type;
+            return pt.getActualTypeArguments();
+        }
+        throw new JSONException("Can't determine target type args for parameterized type");
     }
 
 }
