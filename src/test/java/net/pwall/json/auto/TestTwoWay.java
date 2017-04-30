@@ -288,4 +288,40 @@ public class TestTwoWay {
         assertEquals(a, b);
     }
 
+    @Test
+    public void testOptionalInt() {
+        DummyObject13 a = new DummyObject13();
+        a.setValue1(1234);
+        DummyObject13 b =
+                JSONDeserializer.deserialize(DummyObject13.class, JSONSerializer.serialize(a));
+        assertEquals(a, b);
+        a.setValue1Empty();
+        b = JSONDeserializer.deserialize(DummyObject13.class, JSONSerializer.serialize(a));
+        assertEquals(a, b);
+    }
+
+    @Test
+    public void testOptionalLong() {
+        DummyObject15 a = new DummyObject15();
+        a.setValue1(1234L);
+        DummyObject15 b =
+                JSONDeserializer.deserialize(DummyObject15.class, JSONSerializer.serialize(a));
+        assertEquals(a, b);
+        a.setValue1Empty();
+        b = JSONDeserializer.deserialize(DummyObject15.class, JSONSerializer.serialize(a));
+        assertEquals(a, b);
+    }
+
+    @Test
+    public void testOptionalDouble() {
+        DummyObject17 a = new DummyObject17();
+        a.setValue1(1.234);
+        DummyObject17 b =
+                JSONDeserializer.deserialize(DummyObject17.class, JSONSerializer.serialize(a));
+        assertEquals(a, b);
+        a.setValue1Empty();
+        b = JSONDeserializer.deserialize(DummyObject17.class, JSONSerializer.serialize(a));
+        assertEquals(a, b);
+    }
+
 }

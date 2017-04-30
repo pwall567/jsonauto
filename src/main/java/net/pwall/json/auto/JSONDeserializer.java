@@ -51,6 +51,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.OptionalDouble;
+import java.util.OptionalInt;
+import java.util.OptionalLong;
 import java.util.Set;
 
 import net.pwall.json.JSONArray;
@@ -100,10 +103,17 @@ public class JSONDeserializer {
 
         Objects.requireNonNull(resultClass);
 
-        // is the target an Optional? (before the null check because null := Optional.empty())
+        // is the target an Optional (or OptionalInt etc.)?
+        // (before the null check because null results in Optional.empty())
 
         if (resultClass.equals(Optional.class))
             return (T)deserializeOptional(typeArgs, json);
+        if (resultClass.equals(OptionalInt.class))
+            return (T)deserializeOptionalInt(json);
+        if (resultClass.equals(OptionalLong.class))
+            return (T)deserializeOptionalLong(json);
+        if (resultClass.equals(OptionalDouble.class))
+            return (T)deserializeOptionalDouble(json);
 
         // check for null
 
@@ -682,6 +692,42 @@ public class JSONDeserializer {
         Type[] targetTypeArgs = getGenericTypeArgs(targetType);
         Object value = deserialize(targetClass, targetTypeArgs, json);
         return value != null ? Optional.of(value) : Optional.empty();
+    }
+
+    /**
+     * Deserialize an {@link OptionalInt}.
+     *
+     * @param   json        the JSON for the target value
+     * @return  the result {@link OptionalInt}
+     * @throws  JSONException if the deserialization of the target value throws an exception
+     */
+    public static OptionalInt deserializeOptionalInt(JSONValue json) {
+        Integer value = deserialize(Integer.class, null, json);
+        return value != null ? OptionalInt.of(value) : OptionalInt.empty();
+    }
+
+    /**
+     * Deserialize an {@link OptionalLong}.
+     *
+     * @param   json        the JSON for the target value
+     * @return  the result {@link OptionalLong}
+     * @throws  JSONException if the deserialization of the target value throws an exception
+     */
+    public static OptionalLong deserializeOptionalLong(JSONValue json) {
+        Long value = deserialize(Long.class, null, json);
+        return value != null ? OptionalLong.of(value) : OptionalLong.empty();
+    }
+
+    /**
+     * Deserialize an {@link OptionalDouble}.
+     *
+     * @param   json        the JSON for the target value
+     * @return  the result {@link OptionalDouble}
+     * @throws  JSONException if the deserialization of the target value throws an exception
+     */
+    public static OptionalDouble deserializeOptionalDouble(JSONValue json) {
+        Double value = deserialize(Double.class, null, json);
+        return value != null ? OptionalDouble.of(value) : OptionalDouble.empty();
     }
 
     private static Class<?> getGenericClass(Type type) {

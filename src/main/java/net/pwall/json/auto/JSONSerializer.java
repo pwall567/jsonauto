@@ -45,6 +45,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.OptionalDouble;
+import java.util.OptionalInt;
+import java.util.OptionalLong;
 import java.util.Set;
 
 import net.pwall.json.JSONArray;
@@ -247,6 +250,21 @@ public class JSONSerializer {
 
         if (object instanceof Optional)
             return serializeOptional((Optional<?>)object);
+
+        // is it an OptionalInt?
+
+        if (object instanceof OptionalInt)
+            return serializeOptionalInt((OptionalInt)object);
+
+        // is it an OptionalLong?
+
+        if (object instanceof OptionalLong)
+            return serializeOptionalLong((OptionalLong)object);
+
+        // is it an OptionalDouble?
+
+        if (object instanceof OptionalDouble)
+            return serializeOptionalDouble((OptionalDouble)object);
 
         // TODO - add UUID, java.time classes, ...
 
@@ -562,11 +580,41 @@ public class JSONSerializer {
     /**
      * Serialize an {@link Optional}.
      *
-     * @param   bitSet  the {@link BitSet}
-     * @return  the JSON for that {@link BitSet}
+     * @param   optional    the {@link Optional}
+     * @return  the JSON for that {@link Optional}
      */
     public static JSONValue serializeOptional(Optional<?> optional) {
         return optional.isPresent() ? serialize(optional.get()) : null;
+    }
+
+    /**
+     * Serialize an {@link OptionalInt}.
+     *
+     * @param   optional    the {@link OptionalInt}
+     * @return  the JSON for that {@link OptionalInt}
+     */
+    public static JSONValue serializeOptionalInt(OptionalInt optional) {
+        return optional.isPresent() ? serialize(optional.getAsInt()) : null;
+    }
+
+    /**
+     * Serialize an {@link OptionalLong}.
+     *
+     * @param   optional    the {@link OptionalLong}
+     * @return  the JSON for that {@link OptionalLong}
+     */
+    public static JSONValue serializeOptionalLong(OptionalLong optional) {
+        return optional.isPresent() ? serialize(optional.getAsLong()) : null;
+    }
+
+    /**
+     * Serialize an {@link OptionalDouble}.
+     *
+     * @param   optional    the {@link OptionalDouble}
+     * @return  the JSON for that {@link OptionalDouble}
+     */
+    public static JSONValue serializeOptionalDouble(OptionalDouble optional) {
+        return optional.isPresent() ? serialize(optional.getAsDouble()) : null;
     }
 
     /**
@@ -634,13 +682,34 @@ public class JSONSerializer {
                             if (optional.isPresent())
                                 jsonObject.put(fieldName, serialize(optional.get()));
                             else if (fieldAnnotated(field, JSONAlways.class))
-                                jsonObject.put(fieldName, null);
+                                jsonObject.putNull(fieldName);
+                        }
+                        else if (value instanceof OptionalInt) {
+                            OptionalInt optional = (OptionalInt)value;
+                            if (optional.isPresent())
+                                jsonObject.putValue(fieldName, optional.getAsInt());
+                            else if (fieldAnnotated(field, JSONAlways.class))
+                                jsonObject.putNull(fieldName);
+                        }
+                        else if (value instanceof OptionalLong) {
+                            OptionalLong optional = (OptionalLong)value;
+                            if (optional.isPresent())
+                                jsonObject.putValue(fieldName, optional.getAsLong());
+                            else if (fieldAnnotated(field, JSONAlways.class))
+                                jsonObject.putNull(fieldName);
+                        }
+                        else if (value instanceof OptionalDouble) {
+                            OptionalDouble optional = (OptionalDouble)value;
+                            if (optional.isPresent())
+                                jsonObject.putValue(fieldName, optional.getAsDouble());
+                            else if (fieldAnnotated(field, JSONAlways.class))
+                                jsonObject.putNull(fieldName);
                         }
                         else
                             jsonObject.put(fieldName, serialize(value));
                     }
                     else if (fieldAnnotated(field, JSONAlways.class))
-                        jsonObject.put(fieldName, null);
+                        jsonObject.putNull(fieldName);
                 }
                 catch (JSONException e) {
                     throw e;

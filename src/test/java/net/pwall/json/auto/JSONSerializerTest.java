@@ -589,6 +589,72 @@ public class JSONSerializerTest {
     }
 
     @Test
+    public void testOptional4() {
+        DummyObject12 object12 = new DummyObject12();
+        object12.setValue1(1234);
+        JSONObject jsonObject = JSONObject.create().putValue("value1", 1234);
+        assertEquals(jsonObject, JSONSerializer.serialize(object12));
+        object12.setValue1Empty();
+        jsonObject = JSONObject.create();
+        assertEquals(jsonObject, JSONSerializer.serialize(object12));
+    }
+
+    @Test
+    public void testOptional5() {
+        DummyObject13 object13 = new DummyObject13();
+        object13.setValue1(1234);
+        JSONObject jsonObject = JSONObject.create().putValue("value1", 1234);
+        assertEquals(jsonObject, JSONSerializer.serialize(object13));
+        object13.setValue1Empty();
+        jsonObject = JSONObject.create().putNull("value1");
+        assertEquals(jsonObject, JSONSerializer.serialize(object13));
+    }
+
+    @Test
+    public void testOptional6() {
+        DummyObject14 object14 = new DummyObject14();
+        object14.setValue1(1234L);
+        JSONObject jsonObject = JSONObject.create().putValue("value1", 1234L);
+        assertEquals(jsonObject, JSONSerializer.serialize(object14));
+        object14.setValue1Empty();
+        jsonObject = JSONObject.create();
+        assertEquals(jsonObject, JSONSerializer.serialize(object14));
+    }
+
+    @Test
+    public void testOptional7() {
+        DummyObject15 object15 = new DummyObject15();
+        object15.setValue1(1234L);
+        JSONObject jsonObject = JSONObject.create().putValue("value1", 1234L);
+        assertEquals(jsonObject, JSONSerializer.serialize(object15));
+        object15.setValue1Empty();
+        jsonObject = JSONObject.create().putNull("value1");
+        assertEquals(jsonObject, JSONSerializer.serialize(object15));
+    }
+
+    @Test
+    public void testOptional8() {
+        DummyObject16 object16 = new DummyObject16();
+        object16.setValue1(1.234);
+        JSONObject jsonObject = JSONObject.create().putValue("value1", 1.234);
+        assertEquals(jsonObject, JSONSerializer.serialize(object16));
+        object16.setValue1Empty();
+        jsonObject = JSONObject.create();
+        assertEquals(jsonObject, JSONSerializer.serialize(object16));
+    }
+
+    @Test
+    public void testOptional9() {
+        DummyObject17 object17 = new DummyObject17();
+        object17.setValue1(1.234);
+        JSONObject jsonObject = JSONObject.create().putValue("value1", 1.234);
+        assertEquals(jsonObject, JSONSerializer.serialize(object17));
+        object17.setValue1Empty();
+        jsonObject = JSONObject.create().putNull("value1");
+        assertEquals(jsonObject, JSONSerializer.serialize(object17));
+    }
+
+    @Test
     public void testObject() {
         DummyObject object1 = new DummyObject();
         object1.setString1("value1");

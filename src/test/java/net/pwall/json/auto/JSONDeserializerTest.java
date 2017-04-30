@@ -508,4 +508,37 @@ public class JSONDeserializerTest {
         assertEquals(expected, JSONDeserializer.deserialize(DummyObject10.class, json));
     }
 
+    @Test
+    public void testOptionalInt() {
+        JSONObject json = JSONObject.create().putValue("value1", 1234);
+        DummyObject13 expected = new DummyObject13();
+        expected.setValue1(1234);
+        assertEquals(expected, JSONDeserializer.deserialize(DummyObject13.class, json));
+        json = JSONObject.create();
+        expected = new DummyObject13();
+        assertEquals(expected, JSONDeserializer.deserialize(DummyObject13.class, json));
+    }
+
+    @Test
+    public void testOptionalLong() {
+        JSONObject json = JSONObject.create().putValue("value1", 1234L);
+        DummyObject15 expected = new DummyObject15();
+        expected.setValue1(1234L);
+        assertEquals(expected, JSONDeserializer.deserialize(DummyObject15.class, json));
+        json = JSONObject.create();
+        expected = new DummyObject15();
+        assertEquals(expected, JSONDeserializer.deserialize(DummyObject15.class, json));
+    }
+
+    @Test
+    public void testOptionalDouble() {
+        JSONObject json = JSONObject.create().putValue("value1", 1.234);
+        DummyObject17 expected = new DummyObject17();
+        expected.setValue1(1.234);
+        assertEquals(expected, JSONDeserializer.deserialize(DummyObject17.class, json));
+        json = JSONObject.create();
+        expected = new DummyObject17();
+        assertEquals(expected, JSONDeserializer.deserialize(DummyObject17.class, json));
+    }
+
 }
