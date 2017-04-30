@@ -276,4 +276,16 @@ public class TestTwoWay {
         assertEquals(a, b);
     }
 
+    @Test
+    public void testOptional2() {
+        DummyObject11 a = new DummyObject11();
+        a.setValue1("pqrs");
+        DummyObject11 b =
+                JSONDeserializer.deserialize(DummyObject11.class, JSONSerializer.serialize(a));
+        assertEquals(a, b);
+        a.setValue1Empty();
+        b = JSONDeserializer.deserialize(DummyObject11.class, JSONSerializer.serialize(a));
+        assertEquals(a, b);
+    }
+
 }

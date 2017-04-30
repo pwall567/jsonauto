@@ -100,6 +100,11 @@ public class JSONDeserializer {
 
         Objects.requireNonNull(resultClass);
 
+        // is the target an Optional? (before the null check because null := Optional.empty())
+
+        if (resultClass.equals(Optional.class))
+            return (T)deserializeOptional(typeArgs, json);
+
         // check for null
 
         if (json == null)
@@ -130,11 +135,6 @@ public class JSONDeserializer {
         catch (Exception e) {
             throw new JSONException("Custom deserialization failed for " + resultClass, e);
         }
-
-        // is the target an Optional?
-
-        if (resultClass.equals(Optional.class))
-            return (T)deserializeOptional(typeArgs, json);
 
         // is the JSON a string?
 

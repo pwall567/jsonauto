@@ -25,6 +25,7 @@
 
 package net.pwall.json.auto;
 
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -59,14 +60,15 @@ public class DummyObject10 {
         if (!(other instanceof DummyObject10))
             return false;
         DummyObject10 otherObject = (DummyObject10)other;
-        if (!value1.isPresent())
-            return !otherObject.value1.isPresent();
-        return otherObject.value1.isPresent() && value1.get().equals(otherObject.value1.get());
+//        if (!value1.isPresent())
+//            return !otherObject.value1.isPresent();
+//        return otherObject.value1.isPresent() && value1.get().equals(otherObject.value1.get());
+        return Objects.equals(value1, otherObject.value1);
     }
 
     @Override
     public int hashCode() {
-        return value1.isPresent() ? value1.get().hashCode() : 0;
+        return Objects.hashCode(value1);
     }
 
 }

@@ -25,6 +25,7 @@
 
 package net.pwall.json.auto;
 
+import java.util.Objects;
 import java.util.Optional;
 
 import net.pwall.json.annotation.JSONAlways;
@@ -53,6 +54,21 @@ public class DummyObject11 {
 
     public void setValue1Empty() {
         this.value1 = Optional.empty();
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (this == other)
+            return true;
+        if (!(other instanceof DummyObject11))
+            return false;
+        DummyObject11 otherObject = (DummyObject11)other;
+        return Objects.equals(value1, otherObject.value1);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(value1);
     }
 
 }
