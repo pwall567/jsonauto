@@ -49,6 +49,7 @@ import java.util.OptionalDouble;
 import java.util.OptionalInt;
 import java.util.OptionalLong;
 import java.util.Set;
+import java.util.UUID;
 
 import net.pwall.json.JSONArray;
 import net.pwall.json.JSONBoolean;
@@ -246,6 +247,11 @@ public class JSONSerializer {
         if (object instanceof BitSet)
             return serializeBitSet((BitSet)object);
 
+        // is it a UUID?
+
+        if (object instanceof UUID)
+            return serializeUUID((UUID)object);
+
         // is it an Optional?
 
         if (object instanceof Optional)
@@ -265,8 +271,6 @@ public class JSONSerializer {
 
         if (object instanceof OptionalDouble)
             return serializeOptionalDouble((OptionalDouble)object);
-
-        // TODO - add UUID, java.time classes, ...
 
         // serialize it as an Object (this may not be a satisfactory default behaviour)
 
@@ -575,6 +579,16 @@ public class JSONSerializer {
             if (bitSet.get(i))
                 array.addValue(i);
         return array;
+    }
+
+    /**
+     * Serialize a {@link UUID}.
+     *
+     * @param   uuid    the {@link UUID}
+     * @return  the JSON for that {@link UUID}
+     */
+    public static JSONString serializeUUID(UUID uuid) {
+        return new JSONString(uuid.toString());
     }
 
     /**

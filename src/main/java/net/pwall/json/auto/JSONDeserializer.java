@@ -55,6 +55,7 @@ import java.util.OptionalDouble;
 import java.util.OptionalInt;
 import java.util.OptionalLong;
 import java.util.Set;
+import java.util.UUID;
 
 import net.pwall.json.JSONArray;
 import net.pwall.json.JSONBoolean;
@@ -385,6 +386,17 @@ public class JSONDeserializer {
             }
             catch (Exception e) {
                 throw new JSONException("Can't deserialize Year", e);
+            }
+        }
+
+        // is the target class UUID?
+
+        if (resultClass.equals(UUID.class)) {
+            try {
+                return (T)UUID.fromString(s);
+            }
+            catch (Exception e) {
+                throw new JSONException("Can't deserialize UUID", e);
             }
         }
 

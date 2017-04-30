@@ -50,6 +50,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 import net.pwall.json.JSONArray;
 import net.pwall.json.JSONBoolean;
@@ -403,6 +404,14 @@ public class JSONDeserializerTest {
         expected.set(13);
         expected.set(14);
         assertEquals(expected, JSONDeserializer.deserialize(BitSet.class, json));
+    }
+
+    @Test
+    public void testUUID() {
+        String uuidString = "12ce3730-2d97-11e7-aeed-67b0e6bf0ed7";
+        JSONString json = new JSONString(uuidString);
+        UUID expected = UUID.fromString(uuidString);
+        assertEquals(expected, JSONDeserializer.deserialize(UUID.class, json));
     }
 
     @Test

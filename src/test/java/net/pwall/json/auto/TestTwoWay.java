@@ -38,6 +38,7 @@ import java.time.ZonedDateTime;
 import java.util.BitSet;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.UUID;
 
 import org.junit.Test;
 
@@ -261,6 +262,13 @@ public class TestTwoWay {
         assertEquals(a, b);
         a.set(30);
         b = JSONDeserializer.deserialize(BitSet.class, JSONSerializer.serialize(a));
+        assertEquals(a, b);
+    }
+
+    @Test
+    public void testUUID() {
+        UUID a = UUID.fromString("12ce3730-2d97-11e7-aeed-67b0e6bf0ed7");
+        UUID b = JSONDeserializer.deserialize(UUID.class, JSONSerializer.serialize(a));
         assertEquals(a, b);
     }
 

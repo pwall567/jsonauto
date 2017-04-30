@@ -46,6 +46,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TimeZone;
+import java.util.UUID;
 
 import net.pwall.json.JSONArray;
 import net.pwall.json.JSONBoolean;
@@ -555,6 +556,14 @@ public class JSONSerializerTest {
         bitset.set(3);
         JSONArray jsonArray = JSONArray.create().addValue(1).addValue(3);
         assertEquals(jsonArray, JSONSerializer.serialize(bitset));
+    }
+
+    @Test
+    public void testUUID() {
+        String uuidString = "12ce3730-2d97-11e7-aeed-67b0e6bf0ed7";
+        UUID uuid = UUID.fromString(uuidString);
+        JSONString jsonString = new JSONString(uuidString);
+        assertEquals(jsonString, JSONSerializer.serialize(uuid));
     }
 
     @Test
