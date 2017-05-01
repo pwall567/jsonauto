@@ -66,6 +66,7 @@ import net.pwall.json.JSONZero;
 import net.pwall.json.annotation.JSONAlways;
 import net.pwall.json.annotation.JSONIgnore;
 import net.pwall.json.annotation.JSONName;
+import net.pwall.util.SortedListMap;
 import net.pwall.util.Strings;
 
 /**
@@ -74,6 +75,54 @@ import net.pwall.util.Strings;
  * @author Peter Wall
  */
 public class JSONSerializer {
+
+    @FunctionalInterface
+    public static interface Mapper {
+        JSONValue map(Object object);
+    }
+
+    private static final Map<String, Mapper> classMap = new SortedListMap<>();
+    static {
+        classMap.put(Integer.class.getName(),
+                obj -> JSONInteger.valueOf(((Number)obj).intValue()));
+        classMap.put(Short.class.getName(),
+                obj -> JSONInteger.valueOf(((Number)obj).intValue()));
+        classMap.put(Byte.class.getName(),
+                obj -> JSONInteger.valueOf(((Number)obj).intValue()));
+        classMap.put(Long.class.getName(),
+                obj -> JSONLong.valueOf(((Long)obj).longValue()));
+        classMap.put(Long.class.getName(),
+                obj -> JSONLong.valueOf(((Long)obj).longValue()));
+        classMap.put(Double.class.getName(),
+                obj -> JSONDouble.valueOf(((Double)obj).doubleValue()));
+        classMap.put(Float.class.getName(),
+                obj -> JSONFloat.valueOf(((Float)obj).floatValue()));
+        classMap.put(Boolean.class.getName(), obj -> JSONBoolean.valueOf((Boolean)obj));
+        classMap.put(Character.class.getName(), obj -> {
+            StringBuilder sb = new StringBuilder(1);
+            sb.append(obj);
+            return new JSONString(sb);
+        });
+        classMap.put(Instant.class.getName(), obj -> serializeInstant((Instant)obj));
+        classMap.put(LocalDate.class.getName(), obj -> serializeLocalDate((LocalDate)obj));
+        classMap.put(LocalDateTime.class.getName(),
+                obj -> serializeLocalDateTime((LocalDateTime)obj));
+        classMap.put(OffsetTime.class.getName(), obj -> serializeOffsetTime((OffsetTime)obj));
+        classMap.put(OffsetDateTime.class.getName(),
+                obj -> serializeOffsetDateTime((OffsetDateTime)obj));
+        classMap.put(ZonedDateTime.class.getName(),
+                obj -> serializeZonedDateTime((ZonedDateTime)obj));
+        classMap.put(Year.class.getName(), obj -> serializeYear((Year)obj));
+        classMap.put(YearMonth.class.getName(), obj -> serializeYearMonth((YearMonth)obj));
+        classMap.put(UUID.class.getName(), obj -> serializeUUID((UUID)obj));
+        classMap.put(Optional.class.getName(), obj -> serializeOptional((Optional<?>)obj));
+        classMap.put(OptionalInt.class.getName(),
+                obj -> serializeOptionalInt((OptionalInt)obj));
+        classMap.put(OptionalLong.class.getName(),
+                obj -> serializeOptionalLong((OptionalLong)obj));
+        classMap.put(OptionalDouble.class.getName(),
+                obj -> serializeOptionalDouble((OptionalDouble)obj));
+    }
 
     /**
      * Private constructor.  A question for the future - do I want to allow options to be set on
@@ -95,6 +144,13 @@ public class JSONSerializer {
         if (object == null)
             return null;
 
+        // check final classes
+
+        Class<?> objectClass = object.getClass();
+        Mapper mapper = classMap.get(objectClass.getName());
+        if (mapper != null)
+            return mapper.map(object);
+
         // is it already a JSONValue?
 
         if (object instanceof JSONValue)
@@ -107,36 +163,36 @@ public class JSONSerializer {
 
         // is it an Integer?
 
-        if (object instanceof Integer || object instanceof Short || object instanceof Byte)
-            return JSONInteger.valueOf(((Number)object).intValue());
+//        if (object instanceof Integer || object instanceof Short || object instanceof Byte)
+//            return JSONInteger.valueOf(((Number)object).intValue());
 
         // is it a Long?
 
-        if (object instanceof Long)
-            return JSONLong.valueOf(((Long)object).longValue());
+//        if (object instanceof Long)
+//            return JSONLong.valueOf(((Long)object).longValue());
 
         // is it a Double?
 
-        if (object instanceof Double)
-            return JSONDouble.valueOf(((Double)object).doubleValue());
+//        if (object instanceof Double)
+//            return JSONDouble.valueOf(((Double)object).doubleValue());
 
         // is it a Float?
 
-        if (object instanceof Float)
-            return JSONFloat.valueOf(((Float)object).floatValue());
+//        if (object instanceof Float)
+//            return JSONFloat.valueOf(((Float)object).floatValue());
 
         // is it a Boolean?
 
-        if (object instanceof Boolean)
-            return JSONBoolean.valueOf((Boolean)object);
+//        if (object instanceof Boolean)
+//            return JSONBoolean.valueOf((Boolean)object);
 
         // is it a Character?
 
-        if (object instanceof Character) {
-            StringBuilder sb = new StringBuilder(1);
-            sb.append(object);
-            return new JSONString(sb);
-        }
+//        if (object instanceof Character) {
+//            StringBuilder sb = new StringBuilder(1);
+//            sb.append(object);
+//            return new JSONString(sb);
+//        }
 
         // is it an array of char?
 
@@ -154,7 +210,6 @@ public class JSONSerializer {
 
         // is it an array of primitive type? (other than char)
 
-        Class<?> objectClass = object.getClass();
         if (objectClass.isArray())
             return serializeArray(object);
 
@@ -204,43 +259,43 @@ public class JSONSerializer {
 
         // is it an Instant?
 
-        if (object instanceof Instant)
-            return serializeInstant((Instant)object);
+//        if (object instanceof Instant)
+//            return serializeInstant((Instant)object);
 
         // is it a LocalDate?
 
-        if (object instanceof LocalDate)
-            return serializeLocalDate((LocalDate)object);
+//        if (object instanceof LocalDate)
+//            return serializeLocalDate((LocalDate)object);
 
         // is it a LocalDateTime?
 
-        if (object instanceof LocalDateTime)
-            return serializeLocalDateTime((LocalDateTime)object);
+//        if (object instanceof LocalDateTime)
+//            return serializeLocalDateTime((LocalDateTime)object);
 
         // is it an OffsetTime?
 
-        if (object instanceof OffsetTime)
-            return serializeOffsetTime((OffsetTime)object);
+//        if (object instanceof OffsetTime)
+//            return serializeOffsetTime((OffsetTime)object);
 
         // is it an OffsetDateTime?
 
-        if (object instanceof OffsetDateTime)
-            return serializeOffsetDateTime((OffsetDateTime)object);
+//        if (object instanceof OffsetDateTime)
+//            return serializeOffsetDateTime((OffsetDateTime)object);
 
         // is it a ZonedDateTime?
 
-        if (object instanceof ZonedDateTime)
-            return serializeZonedDateTime((ZonedDateTime)object);
+//        if (object instanceof ZonedDateTime)
+//            return serializeZonedDateTime((ZonedDateTime)object);
 
         // is it a Year?
 
-        if (object instanceof Year)
-            return serializeYear((Year)object);
+//        if (object instanceof Year)
+//            return serializeYear((Year)object);
 
         // is it a YearMonth?
 
-        if (object instanceof YearMonth)
-            return serializeYearMonth((YearMonth)object);
+//        if (object instanceof YearMonth)
+//            return serializeYearMonth((YearMonth)object);
 
         // is it a BitSet?
 
@@ -249,28 +304,28 @@ public class JSONSerializer {
 
         // is it a UUID?
 
-        if (object instanceof UUID)
-            return serializeUUID((UUID)object);
+//        if (object instanceof UUID)
+//            return serializeUUID((UUID)object);
 
         // is it an Optional?
 
-        if (object instanceof Optional)
-            return serializeOptional((Optional<?>)object);
+//        if (object instanceof Optional)
+//            return serializeOptional((Optional<?>)object);
 
         // is it an OptionalInt?
 
-        if (object instanceof OptionalInt)
-            return serializeOptionalInt((OptionalInt)object);
+//        if (object instanceof OptionalInt)
+//            return serializeOptionalInt((OptionalInt)object);
 
         // is it an OptionalLong?
 
-        if (object instanceof OptionalLong)
-            return serializeOptionalLong((OptionalLong)object);
+//        if (object instanceof OptionalLong)
+//            return serializeOptionalLong((OptionalLong)object);
 
         // is it an OptionalDouble?
 
-        if (object instanceof OptionalDouble)
-            return serializeOptionalDouble((OptionalDouble)object);
+//        if (object instanceof OptionalDouble)
+//            return serializeOptionalDouble((OptionalDouble)object);
 
         // serialize it as an Object (this may not be a satisfactory default behaviour)
 
