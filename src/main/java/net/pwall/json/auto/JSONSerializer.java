@@ -94,6 +94,7 @@ public class JSONSerializer {
 
         if (object == null)
             return null;
+        Class<?> objectClass = object.getClass();
 
         // is it already a JSONValue?
 
@@ -107,32 +108,33 @@ public class JSONSerializer {
 
         // is it an Integer?
 
-        if (object instanceof Integer || object instanceof Short || object instanceof Byte)
+        if (objectClass.equals(Integer.class) || objectClass.equals(Short.class) ||
+                objectClass.equals(Byte.class))
             return JSONInteger.valueOf(((Number)object).intValue());
 
         // is it a Long?
 
-        if (object instanceof Long)
+        if (objectClass.equals(Long.class))
             return JSONLong.valueOf(((Long)object).longValue());
 
         // is it a Double?
 
-        if (object instanceof Double)
+        if (objectClass.equals(Double.class))
             return JSONDouble.valueOf(((Double)object).doubleValue());
 
         // is it a Float?
 
-        if (object instanceof Float)
+        if (objectClass.equals(Float.class))
             return JSONFloat.valueOf(((Float)object).floatValue());
 
         // is it a Boolean?
 
-        if (object instanceof Boolean)
+        if (objectClass.equals(Boolean.class))
             return JSONBoolean.valueOf((Boolean)object);
 
         // is it a Character?
 
-        if (object instanceof Character) {
+        if (objectClass.equals(Character.class)) {
             StringBuilder sb = new StringBuilder(1);
             sb.append(object);
             return new JSONString(sb);
@@ -154,7 +156,6 @@ public class JSONSerializer {
 
         // is it an array of primitive type? (other than char)
 
-        Class<?> objectClass = object.getClass();
         if (objectClass.isArray())
             return serializeArray(object);
 
@@ -202,74 +203,39 @@ public class JSONSerializer {
         if (object instanceof Date)
             return serializeDate((Date)object);
 
-        // is it an Instant?
+        // is it an Instant, LocalDate, LocalDateTime etc.?
 
-        if (object instanceof Instant)
-            return serializeInstant((Instant)object);
-
-        // is it a LocalDate?
-
-        if (object instanceof LocalDate)
-            return serializeLocalDate((LocalDate)object);
-
-        // is it a LocalDateTime?
-
-        if (object instanceof LocalDateTime)
-            return serializeLocalDateTime((LocalDateTime)object);
-
-        // is it an OffsetTime?
-
-        if (object instanceof OffsetTime)
-            return serializeOffsetTime((OffsetTime)object);
-
-        // is it an OffsetDateTime?
-
-        if (object instanceof OffsetDateTime)
-            return serializeOffsetDateTime((OffsetDateTime)object);
-
-        // is it a ZonedDateTime?
-
-        if (object instanceof ZonedDateTime)
-            return serializeZonedDateTime((ZonedDateTime)object);
-
-        // is it a Year?
-
-        if (object instanceof Year)
-            return serializeYear((Year)object);
-
-        // is it a YearMonth?
-
-        if (object instanceof YearMonth)
-            return serializeYearMonth((YearMonth)object);
+        if (objectClass.equals(Instant.class) || objectClass.equals(LocalDate.class) ||
+                objectClass.equals(LocalDateTime.class) ||
+                objectClass.equals(OffsetTime.class) ||
+                objectClass.equals(OffsetDateTime.class) ||
+                objectClass.equals(ZonedDateTime.class) || objectClass.equals(Year.class) ||
+                objectClass.equals(YearMonth.class) || objectClass.equals(UUID.class))
+            return new JSONString(object.toString());
 
         // is it a BitSet?
 
         if (object instanceof BitSet)
             return serializeBitSet((BitSet)object);
 
-        // is it a UUID?
-
-        if (object instanceof UUID)
-            return serializeUUID((UUID)object);
-
         // is it an Optional?
 
-        if (object instanceof Optional)
+        if (objectClass.equals(Optional.class))
             return serializeOptional((Optional<?>)object);
 
         // is it an OptionalInt?
 
-        if (object instanceof OptionalInt)
+        if (objectClass.equals(OptionalInt.class))
             return serializeOptionalInt((OptionalInt)object);
 
         // is it an OptionalLong?
 
-        if (object instanceof OptionalLong)
+        if (objectClass.equals(OptionalLong.class))
             return serializeOptionalLong((OptionalLong)object);
 
         // is it an OptionalDouble?
 
-        if (object instanceof OptionalDouble)
+        if (objectClass.equals(OptionalDouble.class))
             return serializeOptionalDouble((OptionalDouble)object);
 
         // serialize it as an Object (this may not be a satisfactory default behaviour)
@@ -488,86 +454,6 @@ public class JSONSerializer {
     }
 
     /**
-     * Serialize an {@link Instant}.
-     *
-     * @param   instant the {@link Instant}
-     * @return  the JSON for that {@link Instant}
-     */
-    public static JSONString serializeInstant(Instant instant) {
-        return new JSONString(instant.toString());
-    }
-
-    /**
-     * Serialize a {@link LocalDate}.
-     *
-     * @param   localDate   the {@link LocalDate}
-     * @return  the JSON for that {@link LocalDate}
-     */
-    public static JSONString serializeLocalDate(LocalDate localDate) {
-        return new JSONString(localDate.toString());
-    }
-
-    /**
-     * Serialize a {@link LocalDateTime}.
-     *
-     * @param   localDateTime   the {@link LocalDateTime}
-     * @return  the JSON for that {@link LocalDateTime}
-     */
-    public static JSONString serializeLocalDateTime(LocalDateTime localDateTime) {
-        return new JSONString(localDateTime.toString());
-    }
-
-    /**
-     * Serialize an {@link OffsetTime}.
-     *
-     * @param   offsetTime  the {@link OffsetTime}
-     * @return  the JSON for that {@link OffsetTime}
-     */
-    public static JSONString serializeOffsetTime(OffsetTime offsetTime) {
-        return new JSONString(offsetTime.toString());
-    }
-
-    /**
-     * Serialize an {@link OffsetDateTime}.
-     *
-     * @param   offsetDateTime  the {@link OffsetDateTime}
-     * @return  the JSON for that {@link OffsetDateTime}
-     */
-    public static JSONString serializeOffsetDateTime(OffsetDateTime offsetDateTime) {
-        return new JSONString(offsetDateTime.toString());
-    }
-
-    /**
-     * Serialize a {@link ZonedDateTime}.
-     *
-     * @param   zonedDateTime   the {@link ZonedDateTime}
-     * @return  the JSON for that {@link ZonedDateTime}
-     */
-    public static JSONString serializeZonedDateTime(ZonedDateTime zonedDateTime) {
-        return new JSONString(zonedDateTime.toString());
-    }
-
-    /**
-     * Serialize a {@link Year}.
-     *
-     * @param   year    the {@link Year}
-     * @return  the JSON for that {@link Year}
-     */
-    public static JSONString serializeYear(Year year) {
-        return new JSONString(year.toString());
-    }
-
-    /**
-     * Serialize a {@link YearMonth}.
-     *
-     * @param   yearMonth   the {@link YearMonth}
-     * @return  the JSON for that {@link YearMonth}
-     */
-    public static JSONString serializeYearMonth(YearMonth yearMonth) {
-        return new JSONString(yearMonth.toString());
-    }
-
-    /**
      * Serialize a {@link BitSet}.
      *
      * @param   bitSet  the {@link BitSet}
@@ -579,16 +465,6 @@ public class JSONSerializer {
             if (bitSet.get(i))
                 array.addValue(i);
         return array;
-    }
-
-    /**
-     * Serialize a {@link UUID}.
-     *
-     * @param   uuid    the {@link UUID}
-     * @return  the JSON for that {@link UUID}
-     */
-    public static JSONString serializeUUID(UUID uuid) {
-        return new JSONString(uuid.toString());
     }
 
     /**
