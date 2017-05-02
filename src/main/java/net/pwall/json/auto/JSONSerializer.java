@@ -134,11 +134,8 @@ public class JSONSerializer {
 
         // is it a Character?
 
-        if (objectClass.equals(Character.class)) {
-            StringBuilder sb = new StringBuilder(1);
-            sb.append(object);
-            return new JSONString(sb);
-        }
+        if (objectClass.equals(Character.class))
+            return new JSONString(object.toString());
 
         // is it an array of char?
 
