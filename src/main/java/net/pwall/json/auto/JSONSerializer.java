@@ -178,7 +178,7 @@ public class JSONSerializer {
         // is it an enum?
 
         if (object instanceof Enum)
-            return new JSONString(((Enum<?>)object).name());
+            return new JSONString(object.toString());
 
         // is it a Collection?
 
@@ -202,12 +202,15 @@ public class JSONSerializer {
 
         // is it an Instant, LocalDate, LocalDateTime etc.?
 
-        if (objectClass.equals(Instant.class) || objectClass.equals(LocalDate.class) ||
+        if (objectClass.equals(Instant.class) ||
+                objectClass.equals(LocalDate.class) ||
                 objectClass.equals(LocalDateTime.class) ||
                 objectClass.equals(OffsetTime.class) ||
                 objectClass.equals(OffsetDateTime.class) ||
-                objectClass.equals(ZonedDateTime.class) || objectClass.equals(Year.class) ||
-                objectClass.equals(YearMonth.class) || objectClass.equals(UUID.class))
+                objectClass.equals(ZonedDateTime.class) ||
+                objectClass.equals(Year.class) ||
+                objectClass.equals(YearMonth.class) ||
+                objectClass.equals(UUID.class))
             return new JSONString(object.toString());
 
         // is it a BitSet?
