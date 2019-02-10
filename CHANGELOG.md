@@ -3,7 +3,7 @@ Added this change log after project was already under way.  Early changes are no
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
-## [Unreleased]
+## [2.0] - 2019-02-10
 ### Changed
 - switched to Java 8; added handling of `java.time` classes and `Optional`
 - added IntelliJ files to `.gitignore`
