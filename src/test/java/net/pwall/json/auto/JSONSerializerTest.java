@@ -2,7 +2,7 @@
  * @(#) JSONSerializerTest.java
  *
  * jsonauto JSON Auto-serialization Library
- * Copyright (c) 2015, 2016, 2017 Peter Wall
+ * Copyright (c) 2015, 2016, 2017, 2019 Peter Wall
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -862,6 +862,18 @@ public class JSONSerializerTest {
         JSONArray jsonArray =
                 JSONArray.create().addValue("abc").addValue("def").addValue("ghi");
         assertEquals(jsonArray, JSONSerializer.serialize(ti));
+    }
+
+    @Test
+    public void testToJSON() {
+        assertEquals("\"abc\"", JSONSerializer.toJSON("abc"));
+        assertEquals("1", JSONSerializer.toJSON(1));
+        assertEquals("true", JSONSerializer.toJSON(Boolean.TRUE));
+        int[] array1 = { 1, 2, 3 };
+        assertEquals("[1,2,3]", JSONSerializer.toJSON(array1));
+        DummyObject object1 = new DummyObject();
+        object1.setString1("value1");
+        assertEquals("{\"string1\":\"value1\"}", JSONSerializer.toJSON(object1));
     }
 
     /**

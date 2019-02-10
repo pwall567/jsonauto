@@ -2,7 +2,7 @@
  * @(#) JSONSerializer.java
  *
  * jsonauto JSON Auto-serialization Library
- * Copyright (c) 2015, 2016, 2017 Peter Wall
+ * Copyright (c) 2015, 2016, 2017, 2019 Peter Wall
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -240,6 +240,17 @@ public class JSONSerializer {
         addFieldsToJSONObject(jsonObject, objectClass, object);
         return jsonObject;
 
+    }
+
+    /**
+     * Serialize an object to its external JSON representation.  This is a convenience method
+     * to allow serialization to a string form in a single call.
+     *
+     * @param   object  the object
+     * @return  the JSON for that object
+     */
+    public static String toJSON(Object object) {
+        return serialize(object).toJSON();
     }
 
     /**

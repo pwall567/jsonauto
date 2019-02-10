@@ -2,7 +2,7 @@
  * @(#) JSONDeserializerTest.java
  *
  * jsonauto JSON Auto-serialization Library
- * Copyright (c) 2016 Peter Wall
+ * Copyright (c) 2016, 2019 Peter Wall
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -559,6 +559,18 @@ public class JSONDeserializerTest {
         json = JSONObject.create();
         expected = new DummyObject17();
         assertEquals(expected, JSONDeserializer.deserialize(DummyObject17.class, json));
+    }
+
+    @Test
+    public void testParse() {
+        Integer int1 = 123;
+        assertEquals(int1, JSONDeserializer.parse(Integer.class, "123"));
+        String str1 = "abc";
+        assertEquals(str1, JSONDeserializer.parse(String.class, "\"abc\""));
+        DummyObject object1 = new DummyObject();
+        object1.setString1("value1");
+        assertEquals(object1,
+                JSONDeserializer.parse(DummyObject.class, "{\"string1\":\"value1\"}"));
     }
 
 }
