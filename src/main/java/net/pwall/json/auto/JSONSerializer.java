@@ -42,6 +42,8 @@ import java.util.BitSet;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
+import java.util.Enumeration;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -164,15 +166,25 @@ public class JSONSerializer {
         if (object instanceof Enum)
             return new JSONString(object.toString());
 
-        // is it a Collection?
+        // is it an Iterable?
 
-        if (object instanceof Collection)
-            return serializeCollection((Collection<?>)object);
+        if (object instanceof Iterable)
+            return serializeIterable((Iterable<?>)object);
 
         // is it a Map?
 
         if (object instanceof Map)
             return serializeMap((Map<?, ?>)object);
+
+        // is it an Enumeration?
+
+        if (object instanceof Enumeration)
+            return serializeEnumeration((Enumeration<?>)object);
+
+        // is it an Iterator?
+
+        if (object instanceof Iterator)
+            return serializeIterator((Iterator<?>)object);
 
         // is it a Calendar?
 
@@ -396,6 +408,47 @@ public class JSONSerializer {
         for (Map.Entry<?, ?> entry : map.entrySet())
             jsonObject.put(entry.getKey().toString(), serialize(entry.getValue()));
         return jsonObject;
+    }
+
+    /**
+     * Serialize an {@link Enumeration}.  Note that this serialization is not symmetrical - it
+     * is not possible to deserialize an {@link Enumeration}.
+     *
+     * @param   e       the {@link Enumeration}
+     * @return  the JSON for that {@link Enumeration}
+     */
+    public static JSONArray serializeEnumeration(Enumeration<?> e) {
+        JSONArray jsonArray = new JSONArray();
+        while (e.hasMoreElements())
+            jsonArray.add(serialize(e.nextElement()));
+        return jsonArray;
+    }
+
+    /**
+     * Serialize an {@link Iterator}.  Note that this serialization is not symmetrical - it is
+     * not possible to deserialize an {@link Iterator}.
+     *
+     * @param   i       the {@link Iterator}
+     * @return  the JSON for that {@link Iterator}
+     */
+    public static JSONArray serializeIterator(Iterator<?> i) {
+        JSONArray jsonArray = new JSONArray();
+        while (i.hasNext())
+            jsonArray.add(serialize(i.next()));
+        return jsonArray;
+    }
+
+    /**
+     * Serialize an {@link Iterable}.
+     *
+     * @param   iterable    the {@link Iterable}
+     * @return  the JSON for that {@link Iterable}
+     */
+    public static JSONArray serializeIterable(Iterable<?> iterable) {
+        JSONArray jsonArray = new JSONArray();
+        for (Object item : iterable)
+            jsonArray.add(serialize(item));
+        return jsonArray;
     }
 
     /**

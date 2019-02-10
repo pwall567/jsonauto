@@ -162,6 +162,17 @@ public class JSONDeserializerTest {
     }
 
     @Test
+    public void testIterable() {
+        JSONArray json = JSONArray.create().addValue("ABC").addValue("def").addValue("!");
+        List<String> expected = new ArrayList<>();
+        expected.add("ABC");
+        expected.add("def");
+        expected.add("!");
+        Type[] types = new Type[] { String.class };
+        assertEquals(expected, JSONDeserializer.deserialize(Iterable.class, types, json));
+    }
+
+    @Test
     public void testArrayList() {
         JSONArray json = JSONArray.create().addValue("ABC").addValue("def").addValue("!");
         ArrayList<String> expected = new ArrayList<>();

@@ -39,10 +39,13 @@ import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TimeZone;
@@ -837,6 +840,30 @@ public class JSONSerializerTest {
         assertEquals(jsonObject, JSONSerializer.serialize(object9));
     }
 
+    @Test
+    public void testEnumeration() {
+        TestEnumeration te = new TestEnumeration();
+        JSONArray jsonArray =
+                JSONArray.create().addValue("abc").addValue("def").addValue("ghi");
+        assertEquals(jsonArray, JSONSerializer.serialize(te));
+    }
+
+    @Test
+    public void testIterator() {
+        TestIterator ti = new TestIterator();
+        JSONArray jsonArray =
+                JSONArray.create().addValue("abc").addValue("def").addValue("ghi");
+        assertEquals(jsonArray, JSONSerializer.serialize(ti));
+    }
+
+    @Test
+    public void testIterable() {
+        TestIterable ti = new TestIterable();
+        JSONArray jsonArray =
+                JSONArray.create().addValue("abc").addValue("def").addValue("ghi");
+        assertEquals(jsonArray, JSONSerializer.serialize(ti));
+    }
+
     /**
      * Test that two {@link List}s have the same contents, regardless of order (used for
      * checking serialization of {@link Set}).
@@ -856,9 +883,56 @@ public class JSONSerializerTest {
                 return false;
             bitSet.set(i);
         }
-        if (bitSet.nextClearBit(0) != len)
-            return false;
-        return true;
+        return bitSet.nextClearBit(0) == len;
+    }
+
+    private static class TestEnumeration implements Enumeration<String> {
+
+        private int index = 0;
+        private String[] array = { "abc", "def", "ghi" };
+
+        @Override
+        public boolean hasMoreElements() {
+            return index < array.length;
+        }
+
+        @Override
+        public String nextElement() {
+            if (!hasMoreElements())
+                throw new NoSuchElementException();
+            return array[index++];
+        }
+
+    }
+
+    private static class TestIterator implements Iterator<String> {
+
+        private int index = 0;
+        private String[] array = { "abc", "def", "ghi" };
+
+        @Override
+        public boolean hasNext() {
+            return index < array.length;
+        }
+
+        @Override
+        public String next() {
+            if (!hasNext())
+                throw new NoSuchElementException();
+            return array[index++];
+        }
+
+    }
+
+    private static class TestIterable implements Iterable<String> {
+
+        private Iterator<String> iterator = new TestIterator();
+
+        @Override
+        public Iterator<String> iterator() {
+            return iterator;
+        }
+
     }
 
 }

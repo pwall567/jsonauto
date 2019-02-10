@@ -5,7 +5,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ## [Unreleased]
 ### Changed
-- switched to Java 8
+- switched to Java 8; added handling of `java.time` classes and `Optional`
+- added IntelliJ files to `.gitignore`
+- added handling of `Enumeration`, `Iterator` and `Iterable`
 
 ## [1.0] - 2017-04-17
 ### Added

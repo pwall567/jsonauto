@@ -2,7 +2,7 @@
  * @(#) JSONDeserializer.java
  *
  * jsonauto JSON Auto-serialization Library
- * Copyright (c) 2016 Peter Wall
+ * Copyright (c) 2016, 2019 Peter Wall
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -188,12 +188,13 @@ public class JSONDeserializer {
             // is the target a Set?
 
             if (resultClass.equals(Set.class))
-                return (T)deserializeCollection((Class<?>)HashSet.class, typeArgs, array);
+                return (T)deserializeCollection(HashSet.class, typeArgs, array);
 
-            // is the target a List or Collection?
+            // is the target a List, Collection or Iterable?
 
-            if (resultClass.equals(List.class) || resultClass.equals(Collection.class))
-                return (T)deserializeCollection((Class<?>)ArrayList.class, typeArgs, array);
+            if (resultClass.equals(List.class) || resultClass.equals(Collection.class) ||
+                    resultClass.equals(Iterable.class))
+                return (T)deserializeCollection(ArrayList.class, typeArgs, array);
 
             // is the target any derived class from Collection?
 
