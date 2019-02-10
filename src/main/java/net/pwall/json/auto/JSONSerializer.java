@@ -106,26 +106,10 @@ public class JSONSerializer {
         if (object instanceof CharSequence)
             return new JSONString((CharSequence)object);
 
-        // is it an Integer?
+        // is is a Number?
 
-        if (objectClass.equals(Integer.class) || objectClass.equals(Short.class) ||
-                objectClass.equals(Byte.class))
-            return JSONInteger.valueOf(((Number)object).intValue());
-
-        // is it a Long?
-
-        if (objectClass.equals(Long.class))
-            return JSONLong.valueOf(((Long)object).longValue());
-
-        // is it a Double?
-
-        if (objectClass.equals(Double.class))
-            return JSONDouble.valueOf(((Double)object).doubleValue());
-
-        // is it a Float?
-
-        if (objectClass.equals(Float.class))
-            return JSONFloat.valueOf(((Float)object).floatValue());
+        if (object instanceof Number)
+            return serializeNumberInternal(objectClass, (Number)object);
 
         // is it a Boolean?
 
@@ -254,24 +238,43 @@ public class JSONSerializer {
      */
     public static JSONNumberValue serializeNumber(Number number) {
 
+        // is it null?
+
+        if (number == null)
+            return null;
+
+        return serializeNumberInternal(number.getClass(), number);
+    }
+
+    /**
+     * Serialize the various {@link Number} classes (skip null check).
+     *
+     * @param   numberClass     the class of the number
+     * @param   number          the {@link Number}
+     * @return  the JSON for that object
+     */
+    private static JSONNumberValue serializeNumberInternal(Class<?> numberClass,
+            Number number) {
+
         // is it an Integer?
 
-        if (number instanceof Integer || number instanceof Short || number instanceof Byte)
+        if (numberClass.equals(Integer.class) || numberClass.equals(Short.class) ||
+                numberClass.equals(Byte.class))
             return JSONInteger.valueOf(number.intValue());
 
         // is it a Long?
 
-        if (number instanceof Long)
+        if (numberClass.equals(Long.class))
             return JSONLong.valueOf(number.longValue());
 
         // is it a Double?
 
-        if (number instanceof Double)
+        if (numberClass.equals(Double.class))
             return JSONDouble.valueOf(number.doubleValue());
 
         // is it a Float?
 
-        if (number instanceof Float)
+        if (numberClass.equals(Float.class))
             return JSONFloat.valueOf(number.floatValue());
 
         // find the best representation
@@ -615,11 +618,24 @@ public class JSONSerializer {
 
     }
 
+    /**
+     * Test whether a field a marked with the {@code static} or {@code transient} modifiers.
+     *
+     * @param   field   the {@link Field}
+     * @return  {@code true} if the field has the {@code static} or {@code transient} modifiers
+     */
     private static boolean fieldStaticOrTransient(Field field) {
         int modifiers = field.getModifiers();
         return Modifier.isStatic(modifiers) || Modifier.isTransient(modifiers);
     }
 
+    /**
+     * Test whether a field is annotated with a nominated annotation class.
+     *
+     * @param   field           the {@link Field}
+     * @param   annotationClass the annotation class
+     * @return  {@code true} if the field has the nominated annotation
+     */
     private static boolean fieldAnnotated(Field field,
             Class<? extends Annotation> annotationClass) {
         return field.getAnnotation(annotationClass) != null;
