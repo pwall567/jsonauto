@@ -2,7 +2,7 @@
  * @(#) JSONSerializer.java
  *
  * jsonauto JSON Auto-serialization Library
- * Copyright (c) 2015, 2016 Peter Wall
+ * Copyright (c) 2015, 2016, 2017 Peter Wall
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,17 +25,33 @@
 
 package net.pwall.json.auto;
 
+import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.OffsetTime;
+import java.time.Year;
+import java.time.YearMonth;
+import java.time.ZonedDateTime;
 import java.util.BitSet;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
+import java.util.Enumeration;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.OptionalDouble;
+import java.util.OptionalInt;
+import java.util.OptionalLong;
 import java.util.Set;
+import java.util.UUID;
 
 import net.pwall.json.JSONArray;
 import net.pwall.json.JSONBoolean;
@@ -52,6 +68,7 @@ import net.pwall.json.JSONZero;
 import net.pwall.json.annotation.JSONAlways;
 import net.pwall.json.annotation.JSONIgnore;
 import net.pwall.json.annotation.JSONName;
+import net.pwall.util.Strings;
 
 /**
  * JSON auto-serialization class.
@@ -79,6 +96,7 @@ public class JSONSerializer {
 
         if (object == null)
             return null;
+        Class<?> objectClass = object.getClass();
 
         // is it already a JSONValue?
 
@@ -90,38 +108,20 @@ public class JSONSerializer {
         if (object instanceof CharSequence)
             return new JSONString((CharSequence)object);
 
-        // is it an Integer?
+        // is is a Number?
 
-        if (object instanceof Integer || object instanceof Short || object instanceof Byte)
-            return JSONInteger.valueOf(((Number)object).intValue());
-
-        // is it a Long?
-
-        if (object instanceof Long)
-            return JSONLong.valueOf(((Long)object).longValue());
-
-        // is it a Double?
-
-        if (object instanceof Double)
-            return JSONDouble.valueOf(((Double)object).doubleValue());
-
-        // is it a Float?
-
-        if (object instanceof Float)
-            return JSONFloat.valueOf(((Float)object).floatValue());
+        if (object instanceof Number)
+            return serializeNumberInternal(objectClass, (Number)object);
 
         // is it a Boolean?
 
-        if (object instanceof Boolean)
+        if (objectClass.equals(Boolean.class))
             return JSONBoolean.valueOf((Boolean)object);
 
         // is it a Character?
 
-        if (object instanceof Character) {
-            StringBuilder sb = new StringBuilder(1);
-            sb.append(object);
-            return new JSONString(sb);
-        }
+        if (objectClass.equals(Character.class))
+            return new JSONString(object.toString());
 
         // is it an array of char?
 
@@ -139,7 +139,6 @@ public class JSONSerializer {
 
         // is it an array of primitive type? (other than char)
 
-        Class<?> objectClass = object.getClass();
         if (objectClass.isArray())
             return serializeArray(object);
 
@@ -165,17 +164,27 @@ public class JSONSerializer {
         // is it an enum?
 
         if (object instanceof Enum)
-            return new JSONString(((Enum<?>)object).name());
+            return new JSONString(object.toString());
 
-        // is it a Collection?
+        // is it an Iterable?
 
-        if (object instanceof Collection)
-            return serializeCollection((Collection<?>)object);
+        if (object instanceof Iterable)
+            return serializeIterable((Iterable<?>)object);
 
         // is it a Map?
 
         if (object instanceof Map)
             return serializeMap((Map<?, ?>)object);
+
+        // is it an Enumeration?
+
+        if (object instanceof Enumeration)
+            return serializeEnumeration((Enumeration<?>)object);
+
+        // is it an Iterator?
+
+        if (object instanceof Iterator)
+            return serializeIterator((Iterator<?>)object);
 
         // is it a Calendar?
 
@@ -187,12 +196,43 @@ public class JSONSerializer {
         if (object instanceof Date)
             return serializeDate((Date)object);
 
+        // is it an Instant, LocalDate, LocalDateTime etc.?
+
+        if (objectClass.equals(Instant.class) ||
+                objectClass.equals(LocalDate.class) ||
+                objectClass.equals(LocalDateTime.class) ||
+                objectClass.equals(OffsetTime.class) ||
+                objectClass.equals(OffsetDateTime.class) ||
+                objectClass.equals(ZonedDateTime.class) ||
+                objectClass.equals(Year.class) ||
+                objectClass.equals(YearMonth.class) ||
+                objectClass.equals(UUID.class))
+            return new JSONString(object.toString());
+
         // is it a BitSet?
 
         if (object instanceof BitSet)
             return serializeBitSet((BitSet)object);
 
-        // TODO - add UUID, java.time classes, ...
+        // is it an Optional?
+
+        if (objectClass.equals(Optional.class))
+            return serializeOptional((Optional<?>)object);
+
+        // is it an OptionalInt?
+
+        if (objectClass.equals(OptionalInt.class))
+            return serializeOptionalInt((OptionalInt)object);
+
+        // is it an OptionalLong?
+
+        if (objectClass.equals(OptionalLong.class))
+            return serializeOptionalLong((OptionalLong)object);
+
+        // is it an OptionalDouble?
+
+        if (objectClass.equals(OptionalDouble.class))
+            return serializeOptionalDouble((OptionalDouble)object);
 
         // serialize it as an Object (this may not be a satisfactory default behaviour)
 
@@ -210,24 +250,43 @@ public class JSONSerializer {
      */
     public static JSONNumberValue serializeNumber(Number number) {
 
+        // is it null?
+
+        if (number == null)
+            return null;
+
+        return serializeNumberInternal(number.getClass(), number);
+    }
+
+    /**
+     * Serialize the various {@link Number} classes (skip null check).
+     *
+     * @param   numberClass     the class of the number
+     * @param   number          the {@link Number}
+     * @return  the JSON for that object
+     */
+    private static JSONNumberValue serializeNumberInternal(Class<?> numberClass,
+            Number number) {
+
         // is it an Integer?
 
-        if (number instanceof Integer || number instanceof Short || number instanceof Byte)
+        if (numberClass.equals(Integer.class) || numberClass.equals(Short.class) ||
+                numberClass.equals(Byte.class))
             return JSONInteger.valueOf(number.intValue());
 
         // is it a Long?
 
-        if (number instanceof Long)
+        if (numberClass.equals(Long.class))
             return JSONLong.valueOf(number.longValue());
 
         // is it a Double?
 
-        if (number instanceof Double)
+        if (numberClass.equals(Double.class))
             return JSONDouble.valueOf(number.doubleValue());
 
         // is it a Float?
 
-        if (number instanceof Float)
+        if (numberClass.equals(Float.class))
             return JSONFloat.valueOf(number.floatValue());
 
         // find the best representation
@@ -352,6 +411,47 @@ public class JSONSerializer {
     }
 
     /**
+     * Serialize an {@link Enumeration}.  Note that this serialization is not symmetrical - it
+     * is not possible to deserialize an {@link Enumeration}.
+     *
+     * @param   e       the {@link Enumeration}
+     * @return  the JSON for that {@link Enumeration}
+     */
+    public static JSONArray serializeEnumeration(Enumeration<?> e) {
+        JSONArray jsonArray = new JSONArray();
+        while (e.hasMoreElements())
+            jsonArray.add(serialize(e.nextElement()));
+        return jsonArray;
+    }
+
+    /**
+     * Serialize an {@link Iterator}.  Note that this serialization is not symmetrical - it is
+     * not possible to deserialize an {@link Iterator}.
+     *
+     * @param   i       the {@link Iterator}
+     * @return  the JSON for that {@link Iterator}
+     */
+    public static JSONArray serializeIterator(Iterator<?> i) {
+        JSONArray jsonArray = new JSONArray();
+        while (i.hasNext())
+            jsonArray.add(serialize(i.next()));
+        return jsonArray;
+    }
+
+    /**
+     * Serialize an {@link Iterable}.
+     *
+     * @param   iterable    the {@link Iterable}
+     * @return  the JSON for that {@link Iterable}
+     */
+    public static JSONArray serializeIterable(Iterable<?> iterable) {
+        JSONArray jsonArray = new JSONArray();
+        for (Object item : iterable)
+            jsonArray.add(serialize(item));
+        return jsonArray;
+    }
+
+    /**
      * Serialize a {@link Date}.
      *
      * @param   date    the {@link Date}
@@ -371,48 +471,42 @@ public class JSONSerializer {
      */
     public static JSONString serializeCalendar(Calendar calendar) {
         StringBuilder sb = new StringBuilder();
-        sb.append(calendar.get(Calendar.YEAR));
-        sb.append('-');
-        append2Digits(sb, calendar.get(Calendar.MONTH) + 1);
-        sb.append('-');
-        append2Digits(sb, calendar.get(Calendar.DAY_OF_MONTH));
-        sb.append('T');
-        append2Digits(sb, calendar.get(Calendar.HOUR_OF_DAY));
-        sb.append(':');
-        append2Digits(sb, calendar.get(Calendar.MINUTE));
-        sb.append(':');
-        append2Digits(sb, calendar.get(Calendar.SECOND));
-        sb.append('.');
-        append3Digits(sb, calendar.get(Calendar.MILLISECOND));
-        int offset = calendar.get(Calendar.ZONE_OFFSET);
-        if (calendar.getTimeZone().inDaylightTime(calendar.getTime()))
-            offset += calendar.get(Calendar.DST_OFFSET);
-        offset /= 60 * 1000;
-        if (offset == 0)
-            sb.append('Z');
-        else {
-            if (offset < 0) {
-                sb.append('-');
-                offset = -offset;
-            }
-            else
-                sb.append('+');
-            append2Digits(sb, offset / 60);
+        try {
+            Strings.appendPositiveInt(sb, calendar.get(Calendar.YEAR));
+            sb.append('-');
+            Strings.append2Digits(sb, calendar.get(Calendar.MONTH) + 1);
+            sb.append('-');
+            Strings.append2Digits(sb, calendar.get(Calendar.DAY_OF_MONTH));
+            sb.append('T');
+            Strings.append2Digits(sb, calendar.get(Calendar.HOUR_OF_DAY));
             sb.append(':');
-            append2Digits(sb, offset % 60);
+            Strings.append2Digits(sb, calendar.get(Calendar.MINUTE));
+            sb.append(':');
+            Strings.append2Digits(sb, calendar.get(Calendar.SECOND));
+            sb.append('.');
+            Strings.append3Digits(sb, calendar.get(Calendar.MILLISECOND));
+            int offset = calendar.get(Calendar.ZONE_OFFSET);
+            if (calendar.getTimeZone().inDaylightTime(calendar.getTime()))
+                offset += calendar.get(Calendar.DST_OFFSET);
+            offset /= 60 * 1000;
+            if (offset == 0)
+                sb.append('Z');
+            else {
+                if (offset < 0) {
+                    sb.append('-');
+                    offset = -offset;
+                }
+                else
+                    sb.append('+');
+                Strings.append2Digits(sb, offset / 60);
+                sb.append(':');
+                Strings.append2Digits(sb, offset % 60);
+            }
+        }
+        catch (IOException ioe) {
+            // can't happen - StringBuilder does not throw IOException
         }
         return new JSONString(sb);
-    }
-
-    private static void append2Digits(StringBuilder sb, int n) {
-        sb.append((char)((n / 10) + '0'));
-        sb.append((char)((n % 10) + '0'));
-    }
-
-    private static void append3Digits(StringBuilder sb, int n) {
-        sb.append((char)((n / 100) + '0'));
-        sb.append((char)(((n / 10) % 10) + '0'));
-        sb.append((char)((n % 10) + '0'));
     }
 
     /**
@@ -427,6 +521,46 @@ public class JSONSerializer {
             if (bitSet.get(i))
                 array.addValue(i);
         return array;
+    }
+
+    /**
+     * Serialize an {@link Optional}.
+     *
+     * @param   optional    the {@link Optional}
+     * @return  the JSON for that {@link Optional}
+     */
+    public static JSONValue serializeOptional(Optional<?> optional) {
+        return optional.isPresent() ? serialize(optional.get()) : null;
+    }
+
+    /**
+     * Serialize an {@link OptionalInt}.
+     *
+     * @param   optional    the {@link OptionalInt}
+     * @return  the JSON for that {@link OptionalInt}
+     */
+    public static JSONValue serializeOptionalInt(OptionalInt optional) {
+        return optional.isPresent() ? serialize(optional.getAsInt()) : null;
+    }
+
+    /**
+     * Serialize an {@link OptionalLong}.
+     *
+     * @param   optional    the {@link OptionalLong}
+     * @return  the JSON for that {@link OptionalLong}
+     */
+    public static JSONValue serializeOptionalLong(OptionalLong optional) {
+        return optional.isPresent() ? serialize(optional.getAsLong()) : null;
+    }
+
+    /**
+     * Serialize an {@link OptionalDouble}.
+     *
+     * @param   optional    the {@link OptionalDouble}
+     * @return  the JSON for that {@link OptionalDouble}
+     */
+    public static JSONValue serializeOptionalDouble(OptionalDouble optional) {
+        return optional.isPresent() ? serialize(optional.getAsDouble()) : null;
     }
 
     /**
@@ -488,8 +622,40 @@ public class JSONSerializer {
                 try {
                     field.setAccessible(true);
                     Object value = field.get(object);
-                    if (value != null || fieldAnnotated(field, JSONAlways.class))
-                        jsonObject.put(fieldName, serialize(value));
+                    if (value != null) {
+                        if (value instanceof Optional) {
+                            Optional<?> optional = (Optional<?>)value;
+                            if (optional.isPresent())
+                                jsonObject.put(fieldName, serialize(optional.get()));
+                            else if (fieldAnnotated(field, JSONAlways.class))
+                                jsonObject.putNull(fieldName);
+                        }
+                        else if (value instanceof OptionalInt) {
+                            OptionalInt optional = (OptionalInt)value;
+                            if (optional.isPresent())
+                                jsonObject.putValue(fieldName, optional.getAsInt());
+                            else if (fieldAnnotated(field, JSONAlways.class))
+                                jsonObject.putNull(fieldName);
+                        }
+                        else if (value instanceof OptionalLong) {
+                            OptionalLong optional = (OptionalLong)value;
+                            if (optional.isPresent())
+                                jsonObject.putValue(fieldName, optional.getAsLong());
+                            else if (fieldAnnotated(field, JSONAlways.class))
+                                jsonObject.putNull(fieldName);
+                        }
+                        else if (value instanceof OptionalDouble) {
+                            OptionalDouble optional = (OptionalDouble)value;
+                            if (optional.isPresent())
+                                jsonObject.putValue(fieldName, optional.getAsDouble());
+                            else if (fieldAnnotated(field, JSONAlways.class))
+                                jsonObject.putNull(fieldName);
+                        }
+                        else
+                            jsonObject.put(fieldName, serialize(value));
+                    }
+                    else if (fieldAnnotated(field, JSONAlways.class))
+                        jsonObject.putNull(fieldName);
                 }
                 catch (JSONException e) {
                     throw e;
@@ -505,11 +671,24 @@ public class JSONSerializer {
 
     }
 
+    /**
+     * Test whether a field a marked with the {@code static} or {@code transient} modifiers.
+     *
+     * @param   field   the {@link Field}
+     * @return  {@code true} if the field has the {@code static} or {@code transient} modifiers
+     */
     private static boolean fieldStaticOrTransient(Field field) {
         int modifiers = field.getModifiers();
         return Modifier.isStatic(modifiers) || Modifier.isTransient(modifiers);
     }
 
+    /**
+     * Test whether a field is annotated with a nominated annotation class.
+     *
+     * @param   field           the {@link Field}
+     * @param   annotationClass the annotation class
+     * @return  {@code true} if the field has the nominated annotation
+     */
     private static boolean fieldAnnotated(Field field,
             Class<? extends Annotation> annotationClass) {
         return field.getAnnotation(annotationClass) != null;

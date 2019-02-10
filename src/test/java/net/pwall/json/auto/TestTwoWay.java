@@ -27,9 +27,18 @@ package net.pwall.json.auto;
 
 import static org.junit.Assert.*;
 
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.OffsetTime;
+import java.time.Year;
+import java.time.YearMonth;
+import java.time.ZonedDateTime;
 import java.util.BitSet;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.UUID;
 
 import org.junit.Test;
 
@@ -178,6 +187,68 @@ public class TestTwoWay {
 //    }
 
     @Test
+    public void testInstant() {
+        Instant a = Instant.now();
+        Instant b = JSONDeserializer.deserialize(Instant.class, JSONSerializer.serialize(a));
+        assertEquals(a, b);
+    }
+
+    @Test
+    public void testLocalDate() {
+        LocalDate a = LocalDate.now();
+        LocalDate b =
+                JSONDeserializer.deserialize(LocalDate.class, JSONSerializer.serialize(a));
+        assertEquals(a, b);
+    }
+
+    @Test
+    public void testLocalDateTime() {
+        LocalDateTime a = LocalDateTime.now();
+        LocalDateTime b =
+                JSONDeserializer.deserialize(LocalDateTime.class, JSONSerializer.serialize(a));
+        assertEquals(a, b);
+    }
+
+    @Test
+    public void testOffsetTime() {
+        OffsetTime a = OffsetTime.now();
+        OffsetTime b =
+                JSONDeserializer.deserialize(OffsetTime.class, JSONSerializer.serialize(a));
+        assertEquals(a, b);
+    }
+
+    @Test
+    public void testOffsetDateTime() {
+        OffsetDateTime a = OffsetDateTime.now();
+        OffsetDateTime b =
+                JSONDeserializer.deserialize(OffsetDateTime.class, JSONSerializer.serialize(a));
+        assertEquals(a, b);
+    }
+
+    @Test
+    public void testZonedDateTime() {
+        ZonedDateTime a = ZonedDateTime.now();
+        ZonedDateTime b =
+                JSONDeserializer.deserialize(ZonedDateTime.class, JSONSerializer.serialize(a));
+        assertEquals(a, b);
+    }
+
+    @Test
+    public void testYear() {
+        Year a = Year.now();
+        Year b = JSONDeserializer.deserialize(Year.class, JSONSerializer.serialize(a));
+        assertEquals(a, b);
+    }
+
+    @Test
+    public void testYearMonth() {
+        YearMonth a = YearMonth.now();
+        YearMonth b =
+                JSONDeserializer.deserialize(YearMonth.class, JSONSerializer.serialize(a));
+        assertEquals(a, b);
+    }
+
+    @Test
     public void testBitSet() {
         BitSet a = new BitSet();
         BitSet b = JSONDeserializer.deserialize(BitSet.class, JSONSerializer.serialize(a));
@@ -191,6 +262,73 @@ public class TestTwoWay {
         assertEquals(a, b);
         a.set(30);
         b = JSONDeserializer.deserialize(BitSet.class, JSONSerializer.serialize(a));
+        assertEquals(a, b);
+    }
+
+    @Test
+    public void testUUID() {
+        UUID a = UUID.fromString("12ce3730-2d97-11e7-aeed-67b0e6bf0ed7");
+        UUID b = JSONDeserializer.deserialize(UUID.class, JSONSerializer.serialize(a));
+        assertEquals(a, b);
+    }
+
+    @Test
+    public void testOptional() {
+        DummyObject10 a = new DummyObject10();
+        a.setValue1("pqrs");
+        DummyObject10 b =
+                JSONDeserializer.deserialize(DummyObject10.class, JSONSerializer.serialize(a));
+        assertEquals(a, b);
+        a.setValue1Empty();
+        b = JSONDeserializer.deserialize(DummyObject10.class, JSONSerializer.serialize(a));
+        assertEquals(a, b);
+    }
+
+    @Test
+    public void testOptional2() {
+        DummyObject11 a = new DummyObject11();
+        a.setValue1("pqrs");
+        DummyObject11 b =
+                JSONDeserializer.deserialize(DummyObject11.class, JSONSerializer.serialize(a));
+        assertEquals(a, b);
+        a.setValue1Empty();
+        b = JSONDeserializer.deserialize(DummyObject11.class, JSONSerializer.serialize(a));
+        assertEquals(a, b);
+    }
+
+    @Test
+    public void testOptionalInt() {
+        DummyObject13 a = new DummyObject13();
+        a.setValue1(1234);
+        DummyObject13 b =
+                JSONDeserializer.deserialize(DummyObject13.class, JSONSerializer.serialize(a));
+        assertEquals(a, b);
+        a.setValue1Empty();
+        b = JSONDeserializer.deserialize(DummyObject13.class, JSONSerializer.serialize(a));
+        assertEquals(a, b);
+    }
+
+    @Test
+    public void testOptionalLong() {
+        DummyObject15 a = new DummyObject15();
+        a.setValue1(1234L);
+        DummyObject15 b =
+                JSONDeserializer.deserialize(DummyObject15.class, JSONSerializer.serialize(a));
+        assertEquals(a, b);
+        a.setValue1Empty();
+        b = JSONDeserializer.deserialize(DummyObject15.class, JSONSerializer.serialize(a));
+        assertEquals(a, b);
+    }
+
+    @Test
+    public void testOptionalDouble() {
+        DummyObject17 a = new DummyObject17();
+        a.setValue1(1.234);
+        DummyObject17 b =
+                JSONDeserializer.deserialize(DummyObject17.class, JSONSerializer.serialize(a));
+        assertEquals(a, b);
+        a.setValue1Empty();
+        b = JSONDeserializer.deserialize(DummyObject17.class, JSONSerializer.serialize(a));
         assertEquals(a, b);
     }
 
