@@ -243,6 +243,17 @@ public class JSONSerializer {
     }
 
     /**
+     * Serialize an object to its external JSON representation.  This is a convenience method
+     * to allow serialization to a string form in a single call.
+     *
+     * @param   object  the object
+     * @return  the JSON for that object
+     */
+    public static String toJSON(Object object) {
+        return serialize(object).toJSON();
+    }
+
+    /**
      * Serialize the various {@link Number} classes.
      *
      * @param   number  the {@link Number} object

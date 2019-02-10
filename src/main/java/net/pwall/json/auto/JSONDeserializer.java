@@ -57,6 +57,7 @@ import java.util.OptionalLong;
 import java.util.Set;
 import java.util.UUID;
 
+import net.pwall.json.JSON;
 import net.pwall.json.JSONArray;
 import net.pwall.json.JSONBoolean;
 import net.pwall.json.JSONException;
@@ -73,6 +74,36 @@ import net.pwall.util.ISO8601Date;
  * @author Peter Wall
  */
 public class JSONDeserializer {
+
+    /**
+     * Deserialize an object from its external JSON (string) representation.
+     *
+     * @param   resultClass     the class of the result object
+     * @param   str             the external JSON (string) representation of the object
+     * @param   <T>             the type of the result
+     * @return  the object
+     * @throws  JSONException   if the string does not contain a valid JSON value, or if the
+     *                          JSON can not be deserialized to the required type
+     * @throws  NullPointerException if the resultClass parameter is {@code null}
+     */
+    public static <T> T parse(Class<T> resultClass, String str) {
+        return deserialize(resultClass, null, JSON.parse(str));
+    }
+    /**
+     * Deserialize an object from its external JSON (string) representation.
+     *
+     * @param   resultClass     the class of the result object
+     * @param   typeArgs        the actual types for a generic class, or {@code null}
+     * @param   str             the external JSON (string) representation of the object
+     * @param   <T>             the type of the result
+     * @return  the object
+     * @throws  JSONException   if the string does not contain a valid JSON value, or if the
+     *                          JSON can not be deserialized to the required type
+     * @throws  NullPointerException if the resultClass parameter is {@code null}
+     */
+    public static <T> T parse(Class<T> resultClass, Type[] typeArgs, String str) {
+        return deserialize(resultClass, typeArgs, JSON.parse(str));
+    }
 
     /**
      * Deserialize an object from its JSON representation.

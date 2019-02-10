@@ -864,6 +864,18 @@ public class JSONSerializerTest {
         assertEquals(jsonArray, JSONSerializer.serialize(ti));
     }
 
+    @Test
+    public void testToJSON() {
+        assertEquals("\"abc\"", JSONSerializer.toJSON("abc"));
+        assertEquals("1", JSONSerializer.toJSON(1));
+        assertEquals("true", JSONSerializer.toJSON(Boolean.TRUE));
+        int[] array1 = { 1, 2, 3 };
+        assertEquals("[1,2,3]", JSONSerializer.toJSON(array1));
+        DummyObject object1 = new DummyObject();
+        object1.setString1("value1");
+        assertEquals("{\"string1\":\"value1\"}", JSONSerializer.toJSON(object1));
+    }
+
     /**
      * Test that two {@link List}s have the same contents, regardless of order (used for
      * checking serialization of {@link Set}).
