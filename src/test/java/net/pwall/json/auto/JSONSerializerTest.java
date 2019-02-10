@@ -2,7 +2,7 @@
  * @(#) JSONSerializerTest.java
  *
  * jsonauto JSON Auto-serialization Library
- * Copyright (c) 2015, 2016 Peter Wall
+ * Copyright (c) 2015, 2016, 2017 Peter Wall
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,16 +25,31 @@
 
 package net.pwall.json.auto;
 
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.OffsetTime;
+import java.time.Year;
+import java.time.YearMonth;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TimeZone;
+import java.util.UUID;
 
 import net.pwall.json.JSONArray;
 import net.pwall.json.JSONBoolean;
@@ -465,31 +480,76 @@ public class JSONSerializerTest {
         cal1.set(Calendar.SECOND, 34);
         cal1.set(Calendar.MILLISECOND, 123);
         Date date1 = cal1.getTime();
-        int offset = TimeZone.getDefault().getOffset(date1.getTime());
-        cal1.set(Calendar.ZONE_OFFSET, offset);
-        StringBuilder sb = new StringBuilder("2015-12-02T21:59:34.123");
-        offset /= 60 * 1000;
-        if (offset == 0)
-            sb.append('Z');
-        else {
-            if (offset < 0) {
-                sb.append('-');
-                offset = - offset;
-            }
-            else
-                sb.append('+');
-            append2Digits(sb, offset / 60);
-            sb.append(':');
-            append2Digits(sb, offset % 60);
-        }
-        JSONString jsonString = new JSONString(sb);
+        JSONString jsonString = new JSONString("2015-12-02T21:59:34.123+11:00");
         assertEquals(jsonString, JSONSerializer.serialize(date1));
     }
 
-    private static void append2Digits(StringBuilder sb, int n) {
-        if (n < 10)
-            sb.append('0');
-        sb.append(n);
+    @Test
+    public void testInstant() {
+        Instant instant = Instant.parse("2017-04-26T21:59:34.123Z");
+        JSONString jsonString = new JSONString("2017-04-26T21:59:34.123Z");
+        assertEquals(jsonString, JSONSerializer.serialize(instant));
+    }
+
+    @Test
+    public void testLocalDate() {
+        LocalDate localDate = LocalDate.of(2017, 4, 27);
+        JSONString jsonString = new JSONString("2017-04-27");
+        assertEquals(jsonString, JSONSerializer.serialize(localDate));
+    }
+
+    @Test
+    public void testLocalDateTime() {
+        LocalDateTime localDateTime = LocalDateTime.of(2017, 4, 28, 13, 5, 12);
+        JSONString jsonString = new JSONString("2017-04-28T13:05:12");
+        assertEquals(jsonString, JSONSerializer.serialize(localDateTime));
+        localDateTime = LocalDateTime.of(2017, 4, 28, 13, 5, 12, 123_000_000);
+        jsonString = new JSONString("2017-04-28T13:05:12.123");
+        assertEquals(jsonString, JSONSerializer.serialize(localDateTime));
+    }
+
+    @Test
+    public void testOffsetTime() {
+        OffsetTime offsetTime = OffsetTime.of(13, 5, 12, 123000000, ZoneOffset.ofHours(10));
+        JSONString jsonString = new JSONString("13:05:12.123+10:00");
+        assertEquals(jsonString, JSONSerializer.serialize(offsetTime));
+    }
+
+    @Test
+    public void testOffsetDateTime() {
+        OffsetDateTime offsetDateTime =
+                OffsetDateTime.of(2017, 4, 29, 13, 5, 12, 123000000, ZoneOffset.ofHours(10));
+        JSONString jsonString = new JSONString("2017-04-29T13:05:12.123+10:00");
+        assertEquals(jsonString, JSONSerializer.serialize(offsetDateTime));
+    }
+
+    @Test
+    public void testZonedDateTime() {
+        ZonedDateTime zonedDateTime = ZonedDateTime.of(2017, 4, 29, 13, 5, 12, 123000000,
+                ZoneId.of("Australia/Sydney"));
+        JSONString jsonString =
+                new JSONString("2017-04-29T13:05:12.123+10:00[Australia/Sydney]");
+        assertEquals(jsonString, JSONSerializer.serialize(zonedDateTime));
+    }
+
+    @Test
+    public void testYear() {
+        Year year = Year.of(2017);
+        JSONString jsonString = new JSONString("2017");
+        assertEquals(jsonString, JSONSerializer.serialize(year));
+        year = Year.of(1917);
+        jsonString = new JSONString("1917");
+        assertEquals(jsonString, JSONSerializer.serialize(year));
+    }
+
+    @Test
+    public void testYearMonth() {
+        YearMonth yearMonth = YearMonth.of(2017, 4);
+        JSONString jsonString = new JSONString("2017-04");
+        assertEquals(jsonString, JSONSerializer.serialize(yearMonth));
+        yearMonth = YearMonth.of(1917, 12);
+        jsonString = new JSONString("1917-12");
+        assertEquals(jsonString, JSONSerializer.serialize(yearMonth));
     }
 
     @Test
@@ -499,6 +559,111 @@ public class JSONSerializerTest {
         bitset.set(3);
         JSONArray jsonArray = JSONArray.create().addValue(1).addValue(3);
         assertEquals(jsonArray, JSONSerializer.serialize(bitset));
+    }
+
+    @Test
+    public void testUUID() {
+        String uuidString = "12ce3730-2d97-11e7-aeed-67b0e6bf0ed7";
+        UUID uuid = UUID.fromString(uuidString);
+        JSONString jsonString = new JSONString(uuidString);
+        assertEquals(jsonString, JSONSerializer.serialize(uuid));
+    }
+
+    @Test
+    public void testOptional() {
+        DummyObject object1 = new DummyObject();
+        object1.setString1("value1");
+        Optional<DummyObject> optional = Optional.of(object1);
+        JSONObject jsonObject = JSONObject.create().putValue("string1", "value1");
+        assertEquals(jsonObject, JSONSerializer.serialize(optional));
+    }
+
+    @Test
+    public void testOptional2() {
+        DummyObject10 object10 = new DummyObject10();
+        object10.setValue1("abcd");
+        JSONObject jsonObject = JSONObject.create().putValue("value1", "abcd");
+        assertEquals(jsonObject, JSONSerializer.serialize(object10));
+        object10.setValue1Empty();
+        jsonObject = JSONObject.create();
+        assertEquals(jsonObject, JSONSerializer.serialize(object10));
+    }
+
+    @Test
+    public void testOptional3() {
+        DummyObject11 object11 = new DummyObject11();
+        object11.setValue1("abcd");
+        JSONObject jsonObject = JSONObject.create().putValue("value1", "abcd");
+        assertEquals(jsonObject, JSONSerializer.serialize(object11));
+        object11.setValue1Empty();
+        jsonObject = JSONObject.create().putNull("value1");
+        assertEquals(jsonObject, JSONSerializer.serialize(object11));
+    }
+
+    @Test
+    public void testOptional4() {
+        DummyObject12 object12 = new DummyObject12();
+        object12.setValue1(1234);
+        JSONObject jsonObject = JSONObject.create().putValue("value1", 1234);
+        assertEquals(jsonObject, JSONSerializer.serialize(object12));
+        object12.setValue1Empty();
+        jsonObject = JSONObject.create();
+        assertEquals(jsonObject, JSONSerializer.serialize(object12));
+    }
+
+    @Test
+    public void testOptional5() {
+        DummyObject13 object13 = new DummyObject13();
+        object13.setValue1(1234);
+        JSONObject jsonObject = JSONObject.create().putValue("value1", 1234);
+        assertEquals(jsonObject, JSONSerializer.serialize(object13));
+        object13.setValue1Empty();
+        jsonObject = JSONObject.create().putNull("value1");
+        assertEquals(jsonObject, JSONSerializer.serialize(object13));
+    }
+
+    @Test
+    public void testOptional6() {
+        DummyObject14 object14 = new DummyObject14();
+        object14.setValue1(1234L);
+        JSONObject jsonObject = JSONObject.create().putValue("value1", 1234L);
+        assertEquals(jsonObject, JSONSerializer.serialize(object14));
+        object14.setValue1Empty();
+        jsonObject = JSONObject.create();
+        assertEquals(jsonObject, JSONSerializer.serialize(object14));
+    }
+
+    @Test
+    public void testOptional7() {
+        DummyObject15 object15 = new DummyObject15();
+        object15.setValue1(1234L);
+        JSONObject jsonObject = JSONObject.create().putValue("value1", 1234L);
+        assertEquals(jsonObject, JSONSerializer.serialize(object15));
+        object15.setValue1Empty();
+        jsonObject = JSONObject.create().putNull("value1");
+        assertEquals(jsonObject, JSONSerializer.serialize(object15));
+    }
+
+    @Test
+    public void testOptional8() {
+        DummyObject16 object16 = new DummyObject16();
+        object16.setValue1(1.234);
+        JSONObject jsonObject = JSONObject.create().putValue("value1", 1.234);
+        assertEquals(jsonObject, JSONSerializer.serialize(object16));
+        object16.setValue1Empty();
+        jsonObject = JSONObject.create();
+        assertEquals(jsonObject, JSONSerializer.serialize(object16));
+    }
+
+    @Test
+    public void testOptional9() {
+        DummyObject17 object17 = new DummyObject17();
+        object17.setValue1(1.234);
+        JSONObject jsonObject = JSONObject.create().putValue("value1", 1.234);
+        assertEquals(jsonObject, JSONSerializer.serialize(object17));
+        object17.setValue1Empty();
+        jsonObject = JSONObject.create().putNull("value1");
+        assertEquals(jsonObject, JSONSerializer.serialize(object17));
     }
 
     @Test
@@ -675,6 +840,30 @@ public class JSONSerializerTest {
         assertEquals(jsonObject, JSONSerializer.serialize(object9));
     }
 
+    @Test
+    public void testEnumeration() {
+        TestEnumeration te = new TestEnumeration();
+        JSONArray jsonArray =
+                JSONArray.create().addValue("abc").addValue("def").addValue("ghi");
+        assertEquals(jsonArray, JSONSerializer.serialize(te));
+    }
+
+    @Test
+    public void testIterator() {
+        TestIterator ti = new TestIterator();
+        JSONArray jsonArray =
+                JSONArray.create().addValue("abc").addValue("def").addValue("ghi");
+        assertEquals(jsonArray, JSONSerializer.serialize(ti));
+    }
+
+    @Test
+    public void testIterable() {
+        TestIterable ti = new TestIterable();
+        JSONArray jsonArray =
+                JSONArray.create().addValue("abc").addValue("def").addValue("ghi");
+        assertEquals(jsonArray, JSONSerializer.serialize(ti));
+    }
+
     /**
      * Test that two {@link List}s have the same contents, regardless of order (used for
      * checking serialization of {@link Set}).
@@ -694,9 +883,56 @@ public class JSONSerializerTest {
                 return false;
             bitSet.set(i);
         }
-        if (bitSet.nextClearBit(0) != len)
-            return false;
-        return true;
+        return bitSet.nextClearBit(0) == len;
+    }
+
+    private static class TestEnumeration implements Enumeration<String> {
+
+        private int index = 0;
+        private String[] array = { "abc", "def", "ghi" };
+
+        @Override
+        public boolean hasMoreElements() {
+            return index < array.length;
+        }
+
+        @Override
+        public String nextElement() {
+            if (!hasMoreElements())
+                throw new NoSuchElementException();
+            return array[index++];
+        }
+
+    }
+
+    private static class TestIterator implements Iterator<String> {
+
+        private int index = 0;
+        private String[] array = { "abc", "def", "ghi" };
+
+        @Override
+        public boolean hasNext() {
+            return index < array.length;
+        }
+
+        @Override
+        public String next() {
+            if (!hasNext())
+                throw new NoSuchElementException();
+            return array[index++];
+        }
+
+    }
+
+    private static class TestIterable implements Iterable<String> {
+
+        private Iterator<String> iterator = new TestIterator();
+
+        @Override
+        public Iterator<String> iterator() {
+            return iterator;
+        }
+
     }
 
 }
