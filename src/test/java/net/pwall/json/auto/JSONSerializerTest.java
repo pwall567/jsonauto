@@ -865,6 +865,14 @@ public class JSONSerializerTest {
     }
 
     @Test
+    public void testIterable2() {
+        TestIterable2 ti = new TestIterable2();
+        JSONArray jsonArray =
+                JSONArray.create().addValue("abc").addValue("def").addValue("ghi");
+        assertEquals(jsonArray, JSONSerializer.serialize(ti));
+    }
+
+    @Test
     public void testToJSON() {
         assertEquals("\"abc\"", JSONSerializer.toJSON("abc"));
         assertEquals("1", JSONSerializer.toJSON(1));
@@ -941,6 +949,19 @@ public class JSONSerializerTest {
         private Iterator<String> iterator = new TestIterator();
 
         @Override
+        public Iterator<String> iterator() {
+            return iterator;
+        }
+
+    }
+
+    private static class TestIterable2 {
+
+        // this class represents a Kotlin Sequence - it looks like an Iterable but it doesn't
+        // implement the Iterable interface
+
+        private Iterator<String> iterator = new TestIterator();
+
         public Iterator<String> iterator() {
             return iterator;
         }

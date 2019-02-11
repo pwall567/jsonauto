@@ -3,6 +3,10 @@ Added this change log after project was already under way.  Early changes are no
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
+## [Unreleased]
+### Changed
+- added handling of Kotlin `Sequence`
+
 ## [2.1] - 2019-02-10
 ### Changed
 - added shortcut method `toJSON()` to `JSONSerializer` to output directly to string
