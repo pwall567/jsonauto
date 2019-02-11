@@ -171,6 +171,25 @@ public class JSONSerializer {
         if (object instanceof Iterable)
             return serializeIterable((Iterable<?>)object);
 
+        // is it a dummy Iterable?
+        // that is, a class that has a single method named iterator
+        // Kotlin Sequence implementations fit this pattern
+
+        try {
+            Method toJSON = objectClass.getDeclaredMethod("iterator");
+            toJSON.setAccessible(true);
+            if (Iterator.class.isAssignableFrom(toJSON.getReturnType()) &&
+                    objectClass.getDeclaredMethods().length == 1)
+                return serializeIterator((Iterator<?>)toJSON.invoke(object));
+        }
+        catch (NoSuchMethodException e) {
+            // ignore - normal case
+        }
+        catch (Exception e) {
+            throw new JSONException(
+                    "Iterator serialization failed for " + objectClass.getName(), e);
+        }
+
         // is it a Map?
 
         if (object instanceof Map)
