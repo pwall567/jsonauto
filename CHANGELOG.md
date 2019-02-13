@@ -3,7 +3,7 @@ Added this change log after project was already under way.  Early changes are no
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
-## [Unreleased]
+## [2.3] - 2019-02-13
 ### Changed
 - improved handling of Kotlin `Sequence`
 
