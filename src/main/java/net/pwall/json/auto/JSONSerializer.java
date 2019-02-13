@@ -77,6 +77,17 @@ import net.pwall.util.Strings;
  */
 public class JSONSerializer {
 
+    private static Class<?> kotlinSequenceInterface = null;
+
+    static {
+        try {
+            kotlinSequenceInterface = Class.forName("kotlin.sequences.Sequence");
+        }
+        catch (Exception e) {
+            // ignore - kotlin libraries not present
+        }
+    }
+
     /**
      * Private constructor.  A question for the future - do I want to allow options to be set on
      * an individual instance of this class to customise the serialization?
@@ -171,23 +182,22 @@ public class JSONSerializer {
         if (object instanceof Iterable)
             return serializeIterable((Iterable<?>)object);
 
-        // is it a dummy Iterable?
-        // that is, a class that has a single method named iterator
-        // Kotlin Sequence implementations fit this pattern
+        // is it a Kotlin Sequence?
 
-        try {
-            Method toJSON = objectClass.getDeclaredMethod("iterator");
-            toJSON.setAccessible(true);
-            if (Iterator.class.isAssignableFrom(toJSON.getReturnType()) &&
-                    objectClass.getDeclaredMethods().length == 1)
-                return serializeIterator((Iterator<?>)toJSON.invoke(object));
-        }
-        catch (NoSuchMethodException e) {
-            // ignore - normal case
-        }
-        catch (Exception e) {
-            throw new JSONException(
-                    "Iterator serialization failed for " + objectClass.getName(), e);
+        if (kotlinSequenceInterface != null) {
+            if (kotlinSequenceInterface.isAssignableFrom(objectClass)) {
+                try {
+                    Method iterator = objectClass.getDeclaredMethod("iterator");
+                    if (Iterator.class.isAssignableFrom(iterator.getReturnType()))
+                        return serializeIterator((Iterator<?>)iterator.invoke(object));
+                }
+                catch (NoSuchMethodException ignore) {
+                }
+                catch (Exception e) {
+                    throw new JSONException(
+                            "Sequence serialization failed for " + objectClass.getName(), e);
+                }
+            }
         }
 
         // is it a Map?
